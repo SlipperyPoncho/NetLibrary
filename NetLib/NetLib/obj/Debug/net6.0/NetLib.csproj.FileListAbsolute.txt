@@ -1,0 +1,12 @@
+D:\C# Projects\NetLibrary\NetLib\NetLib\bin\Debug\net6.0\NetLib.deps.json
+D:\C# Projects\NetLibrary\NetLib\NetLib\bin\Debug\net6.0\NetLib.dll
+D:\C# Projects\NetLibrary\NetLib\NetLib\bin\Debug\net6.0\NetLib.pdb
+D:\C# Projects\NetLibrary\NetLib\NetLib\obj\Debug\net6.0\NetLib.csproj.AssemblyReference.cache
+D:\C# Projects\NetLibrary\NetLib\NetLib\obj\Debug\net6.0\NetLib.GeneratedMSBuildEditorConfig.editorconfig
+D:\C# Projects\NetLibrary\NetLib\NetLib\obj\Debug\net6.0\NetLib.AssemblyInfoInputs.cache
+D:\C# Projects\NetLibrary\NetLib\NetLib\obj\Debug\net6.0\NetLib.AssemblyInfo.cs
+D:\C# Projects\NetLibrary\NetLib\NetLib\obj\Debug\net6.0\NetLib.csproj.CoreCompileInputs.cache
+D:\C# Projects\NetLibrary\NetLib\NetLib\obj\Debug\net6.0\NetLib.dll
+D:\C# Projects\NetLibrary\NetLib\NetLib\obj\Debug\net6.0\refint\NetLib.dll
+D:\C# Projects\NetLibrary\NetLib\NetLib\obj\Debug\net6.0\NetLib.pdb
+D:\C# Projects\NetLibrary\NetLib\NetLib\obj\Debug\net6.0\ref\NetLib.dll
