@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 
+
 namespace NetLib
 {
     namespace Server
@@ -30,6 +31,8 @@ namespace NetLib
                     {
                         Console.WriteLine("Waiting for broadcast...");
                         byte[] bytes = listener.Receive(ref clientEP);
+
+
 
                         Console.WriteLine($"Received broadcast from {clientEP} :");
                         Console.WriteLine($" {Encoding.ASCII.GetString(bytes, 0, bytes.Length)}");
