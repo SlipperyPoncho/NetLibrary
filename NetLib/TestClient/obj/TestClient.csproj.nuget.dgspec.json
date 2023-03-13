@@ -1,20 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "D:\\C# Projects\\NetLibrary\\NetLib\\TestClient\\TestClient.csproj": {}
+    "D:\\ВИТЯ ЛОЛОЛО\\4курсЧУМА\\Diplo\\netlib_main\\NetLibrary\\NetLib\\TestClient\\TestClient.csproj": {}
   },
   "projects": {
-    "D:\\C# Projects\\NetLibrary\\NetLib\\NetLib\\NetLib.csproj": {
+    "D:\\ВИТЯ ЛОЛОЛО\\4курсЧУМА\\Diplo\\netlib_main\\NetLibrary\\NetLib\\NetLib\\NetLib.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\C# Projects\\NetLibrary\\NetLib\\NetLib\\NetLib.csproj",
+        "projectUniqueName": "D:\\ВИТЯ ЛОЛОЛО\\4курсЧУМА\\Diplo\\netlib_main\\NetLibrary\\NetLib\\NetLib\\NetLib.csproj",
         "projectName": "NetLib",
-        "projectPath": "D:\\C# Projects\\NetLibrary\\NetLib\\NetLib\\NetLib.csproj",
-        "packagesPath": "C:\\Users\\Artem\\.nuget\\packages\\",
-        "outputPath": "D:\\C# Projects\\NetLibrary\\NetLib\\NetLib\\obj\\",
+        "projectPath": "D:\\ВИТЯ ЛОЛОЛО\\4курсЧУМА\\Diplo\\netlib_main\\NetLibrary\\NetLib\\NetLib\\NetLib.csproj",
+        "packagesPath": "C:\\Users\\NelRyel\\.nuget\\packages\\",
+        "outputPath": "D:\\ВИТЯ ЛОЛОЛО\\4курсЧУМА\\Diplo\\netlib_main\\NetLibrary\\NetLib\\NetLib\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
         "configFilePaths": [
-          "C:\\Users\\Artem\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\NelRyel\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -45,31 +48,28 @@
             "net47",
             "net471",
             "net472",
-            "net48",
-            "net481"
+            "net48"
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "frameworkReferences": {
-            "Microsoft.NETCore.App": {
-              "privateAssets": "all"
-            }
-          },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.409\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "D:\\C# Projects\\NetLibrary\\NetLib\\TestClient\\TestClient.csproj": {
+    "D:\\ВИТЯ ЛОЛОЛО\\4курсЧУМА\\Diplo\\netlib_main\\NetLibrary\\NetLib\\TestClient\\TestClient.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\C# Projects\\NetLibrary\\NetLib\\TestClient\\TestClient.csproj",
+        "projectUniqueName": "D:\\ВИТЯ ЛОЛОЛО\\4курсЧУМА\\Diplo\\netlib_main\\NetLibrary\\NetLib\\TestClient\\TestClient.csproj",
         "projectName": "TestClient",
-        "projectPath": "D:\\C# Projects\\NetLibrary\\NetLib\\TestClient\\TestClient.csproj",
-        "packagesPath": "C:\\Users\\Artem\\.nuget\\packages\\",
-        "outputPath": "D:\\C# Projects\\NetLibrary\\NetLib\\TestClient\\obj\\",
+        "projectPath": "D:\\ВИТЯ ЛОЛОЛО\\4курсЧУМА\\Diplo\\netlib_main\\NetLibrary\\NetLib\\TestClient\\TestClient.csproj",
+        "packagesPath": "C:\\Users\\NelRyel\\.nuget\\packages\\",
+        "outputPath": "D:\\ВИТЯ ЛОЛОЛО\\4курсЧУМА\\Diplo\\netlib_main\\NetLibrary\\NetLib\\TestClient\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
         "configFilePaths": [
-          "C:\\Users\\Artem\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\NelRyel\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -83,8 +83,8 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "D:\\C# Projects\\NetLibrary\\NetLib\\NetLib\\NetLib.csproj": {
-                "projectPath": "D:\\C# Projects\\NetLibrary\\NetLib\\NetLib\\NetLib.csproj"
+              "D:\\ВИТЯ ЛОЛОЛО\\4курсЧУМА\\Diplo\\netlib_main\\NetLibrary\\NetLib\\NetLib\\NetLib.csproj": {
+                "projectPath": "D:\\ВИТЯ ЛОЛОЛО\\4курсЧУМА\\Diplo\\netlib_main\\NetLibrary\\NetLib\\NetLib\\NetLib.csproj"
               }
             }
           }
@@ -104,17 +104,11 @@
             "net47",
             "net471",
             "net472",
-            "net48",
-            "net481"
+            "net48"
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "frameworkReferences": {
-            "Microsoft.NETCore.App": {
-              "privateAssets": "all"
-            }
-          },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.409\\RuntimeIdentifierGraph.json"
         }
       }
     }
