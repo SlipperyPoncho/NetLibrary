@@ -15,14 +15,41 @@ namespace NetLib
             public IPEndPoint address;
 
         }
-        
+
         public class Server
         {
-            public Server() { }
 
-            public void Start(int port)
+            private Connection connection;
+
+            public Server(int port) 
+            { 
+                connection = new Connection(port);
+            }
+
+            public void Start()
             {
-                UdpClient listener = new(port);
+                connection.Start();
+            }
+
+            public void Tick()
+            {
+
+            }
+
+            public void Send()
+            {
+
+            }
+        }
+    }
+}
+
+
+
+
+
+/*
+ * UdpClient listener = new(port);
                 IPEndPoint clientEP = new(IPAddress.Any, port);
 
                 try
@@ -44,18 +71,4 @@ namespace NetLib
                 finally
                 {
                     listener.Close();
-                }
-            }
-
-            public void Tick()
-            {
-
-            }
-
-            public void Send()
-            {
-
-            }
-        }
-    }
-}
+                } */

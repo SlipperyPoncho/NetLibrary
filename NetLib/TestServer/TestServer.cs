@@ -4,7 +4,7 @@ class TestServer
 {
     static void Main(string[] args)
     {
-        Server server = new();
-        server.Start(11000);
+        Server server = new(11000);
+        server.Start();
     }
 }

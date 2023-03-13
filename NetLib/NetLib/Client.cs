@@ -7,13 +7,20 @@ namespace NetLib
 {
     public class Client
     {
-        public Client() { }
 
-        Socket sender;
+        private Connection connection;
+        private IPEndPoint serverEndPoint;
 
-        public void Start(int port)
+        public Client(IPEndPoint serverEndPoint, int port) 
         {
-            sender = new(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            this.serverEndPoint = serverEndPoint;
+            connection = new(port);
+            connection.Start();
+        }
+
+        public void Start()
+        {
+            connection.Start();
         }
 
         public void Tick()
@@ -21,17 +28,9 @@ namespace NetLib
 
         }
 
-        public void Send(string ip, string mes)
+        public void Send(string msg)
         {
-            IPAddress broadcast = IPAddress.Parse(ip);
-
-            byte[] sendbuf = Encoding.ASCII.GetBytes(mes);
-            IPEndPoint ep = new(broadcast, 11000);
-
-            sender.SendTo(sendbuf, ep);
-
-            Console.WriteLine("Message sent to the broadcast address");
-            Console.ReadLine();
+            connection.Send(serverEndPoint, msg);
         }
     }
 }
