@@ -6,17 +6,25 @@ using System.Text;
 
 namespace NetLib
 {
+    public class ClientInfo {
+        public long sequence = 0;
+        public float rtt = 0;
+        public bool isAlive = true;
+
+        public ConcurrentDictionary<long, IPacket> reliablePackets = new();
+    }
+
 
     public struct NetMessage {
-
-        //public Packet packet { get; set; }
-        public string message { get; set; }
+        public IPacket packet { get; set; }
+        //public string message { get; set; }
         public DateTime RecieveTime { get; set; }
     }
 
     public class Connection
     {
         public ConcurrentQueue<NetMessage> q_incomingMessages = new();
+        public ConcurrentDictionary<IPEndPoint, ClientInfo> activeClients = new();
         
         private Thread _networkListener;
         private UdpClient client;  
@@ -38,37 +46,48 @@ namespace NetLib
         public void Close() {
             _connectionRunning = false;
         }
-        
-        public void Send(IPEndPoint receiver, string msg) {
-            byte[] sendbuff = Encoding.ASCII.GetBytes(msg);
-            client.Send(sendbuff, receiver);                  
-            Console.WriteLine("Sending message " + sendbuff.Length);
+
+        public void Send(IPEndPoint receiver, IPacket packet, bool reliable = false) { //this is retarted. it should somehow send it and then wait for the ack message. probably better to make it a separate async function entirely
+            if (reliable) {
+                if (!activeClients.TryGetValue(receiver, out ClientInfo? info)) return;  // is info a copy or a reference??? should i update it later?
+                if (info == null) return;
+
+                packet.isReliable = true;
+                packet.seq = info.sequence;
+
+                info.reliablePackets.TryAdd(packet.seq, packet);
+
+                byte[] data = packet.getRaw();
+                client.Send(data, receiver);
+            }
+            else{ //send-and-forget
+                byte[] data = packet.getRaw();
+                client.Send(data, receiver);
+            }
+        }
+
+        public void registerActiveClient(IPEndPoint endPoint) {
+            if (endPoint == null) return;
+            activeClients.TryAdd(endPoint, new ClientInfo());
         }
 
         //separate thread
         private void _networkReceive() {
             if (!_connectionRunning) return;
 
-            IPEndPoint connection = new(IPAddress.Any, port);
-            Console.WriteLine("Connection network listener started...");
-        
+            IPEndPoint connection = new IPEndPoint(IPAddress.Any, port);
+
             while (_connectionRunning) {
-                bool canRead = client.Available > 0;
-                if (canRead) {
-                    byte[] data = client.Receive(ref connection);
-                    Console.WriteLine($"Connection received broadcast from {connection}");
-                    Console.WriteLine($"Message is as follows: {Encoding.ASCII.GetString(data, 0, data.Length)}");
-                    q_incomingMessages.Enqueue(new NetMessage {
-                        message = Encoding.ASCII.GetString(data, 0, data.Length),
-                        RecieveTime = DateTime.Now
-                    });
-                }
-                else {
-                    Thread.Sleep(1);
+                if(client.Available > 0) {
+                    byte[] data = client.Receive(ref connection);   //somewhere here it should check if it's an ack packet and then let the send shit know that it should stop knocking at the clients door
+                    IPacket packet = PacketReader.readFromRaw(data);
+                    NetMessage message = new NetMessage { packet = packet, RecieveTime = DateTime.Now };
+                    q_incomingMessages.Enqueue(message);
                 }
             }
         
         }
 
     }
+
 }
