@@ -23,7 +23,7 @@ namespace NetLib
 
             public Server(int port) 
             { 
-                connection = new Connection(port);
+                connection = new Connection(port, true);
             }
 
             public void Start()

@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Net;
+using System.Net.Sockets;
 
+
+// seq is no longer needed for packets (so is the isReliable flag)
 namespace NetLib
 {
 
     public static class PacketReader {
         public static IPacket readFromRaw(byte[] data) { return null; }
+        public static IPacket readFromStream(NetworkStream stream) { return null; }
     }
 
     public interface IPacket {
@@ -24,6 +29,6 @@ namespace NetLib
     }
 
     public class ACKPacket : Packet {
-        public long seq = 0;
+        public long seq = 0; 
     }
 }
