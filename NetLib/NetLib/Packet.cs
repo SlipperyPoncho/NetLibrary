@@ -1,34 +1,51 @@
-﻿using System;
-using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
+using System.Text;
 
 
 // seq is no longer needed for packets (so is the isReliable flag)
 namespace NetLib
 {
 
-    public static class PacketReader {
-        public static IPacket readFromRaw(byte[] data) { return null; }
-        public static IPacket readFromStream(NetworkStream stream) { return null; }
+    public abstract class Packet
+    {
+        private int packetID;
+        private PacketType packetType;
+
+        public int PacketID { get => packetID; set => packetID = value; }
+        public PacketType PacketType { get => packetType; set => packetType = value; }
+
+        public abstract byte[] GetRaw();
     }
 
-    public interface IPacket {
-        public bool isReliable { get; set; }
-        public byte[] getRaw();
-        public long seq { get; set; }
-    }
+    public class TestPacket : Packet
+    {
+        private string text;
 
+        public string Text { get => text; set => text = value; }
 
-    public class Packet : IPacket {
-        public bool isReliable { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public long seq { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        public byte[] getRaw() {
-            throw new NotImplementedException();
+        public TestPacket(string text)
+        {
+            this.text = text;
         }
-    }
 
-    public class ACKPacket : Packet {
-        public long seq = 0; 
+        public override byte[] GetRaw()
+        {
+            MemoryStream stream = new();
+
+            byte[] data = BitConverter.GetBytes(PacketID);
+            stream.Write(data, 0, data.Length);
+
+            data = BitConverter.GetBytes((int)PacketType);
+            stream.Write(data, 0, data.Length);
+
+            data = BitConverter.GetBytes(text.Length * sizeof(char));
+            stream.Write(data, 0, data.Length);
+
+            data = Encoding.ASCII.GetBytes(text);
+            stream.Write(data, 0, data.Length);
+
+            return stream.ToArray();
+        }
     }
 }
