@@ -1,9 +1,12 @@
-﻿using System.Net.Sockets;
+using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text;
 
+
+// seq is no longer needed for packets (so is the isReliable flag)
 namespace NetLib
 {
+
     public abstract class Packet
     {
         private int packetID;

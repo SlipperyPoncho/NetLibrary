@@ -23,7 +23,7 @@ namespace NetLib
 
             public Server(int port) 
             { 
-                connection = new Connection(port);
+                connection = new Connection(port, true);
             }
 
             public void Start()
@@ -35,40 +35,6 @@ namespace NetLib
             {
 
             }
-
-            public void Send()
-            {
-
-            }
         }
     }
 }
-
-
-
-
-
-/*
- * UdpClient listener = new(port);
-                IPEndPoint clientEP = new(IPAddress.Any, port);
-
-                try
-                {
-                    while (true)
-                    {
-                        Console.WriteLine("Waiting for broadcast...");
-                        byte[] bytes = listener.Receive(ref clientEP);
-
-
-
-                        Console.WriteLine($"Received broadcast from {clientEP} :");
-                        Console.WriteLine($" {Encoding.ASCII.GetString(bytes, 0, bytes.Length)}");
-                    }
-                } catch (SocketException e)
-                {
-                    Console.WriteLine(e);
-                }
-                finally
-                {
-                    listener.Close();
-                } */
