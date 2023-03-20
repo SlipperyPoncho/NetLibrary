@@ -1,64 +1,48 @@
-﻿namespace NetLib
+﻿using System.Net.Sockets;
+using System.Runtime.CompilerServices;
+using System.Text;
+
+namespace NetLib
 {
-    public enum PacketType
+    public abstract class Packet
     {
-        Unknown = 0,
-        ConnectionRequest = 1,
-        ConnectionAccept = 2,
-        ConnectionDismiss = 3,
-        Heartbeat = 4,
-        ApplicationData = 5,
-        Disconnect = 6,
-        Acknowledgement = 7
+        private int packetID;
+        private PacketType packetType;
+
+        public int PacketID { get => packetID; set => packetID = value; }
+        public PacketType PacketType { get => packetType; set => packetType = value; }
+
+        public abstract byte[] GetRaw();
     }
 
-    public class Packet
+    public class TestPacket : Packet
     {
-        public bool IsAcknowleged = false;
-        public static int PacketID { get; set; }
-        public static byte[]? PayloadData { get; set; }
-        
-        public Packet()
+        private string text;
+
+        public string Text { get => text; set => text = value; }
+
+        public TestPacket(string text)
         {
-            PacketID = 0;
-            PayloadData = Array.Empty<byte>();
+            this.text = text;
         }
 
-        public Packet(int packetID, byte[] payloadData)
-        {
-            PacketID = packetID;
-            PayloadData = payloadData;
-        }
-
-        public static byte[] Serialize()
+        public override byte[] GetRaw()
         {
             MemoryStream stream = new();
 
             byte[] data = BitConverter.GetBytes(PacketID);
             stream.Write(data, 0, data.Length);
 
-            #pragma warning disable CS8602 // Разыменование вероятной пустой ссылки.
-            data = BitConverter.GetBytes(PayloadData.Length);
-            #pragma warning restore CS8602 // Разыменование вероятной пустой ссылки.
-
+            data = BitConverter.GetBytes((int)PacketType);
             stream.Write(data, 0, data.Length);
 
-            stream.Write(PayloadData, 0, PayloadData.Length);
+            data = BitConverter.GetBytes(text.Length * sizeof(char));
+            stream.Write(data, 0, data.Length);
+
+            data = Encoding.ASCII.GetBytes(text);
+            stream.Write(data, 0, data.Length);
 
             return stream.ToArray();
-        }
-
-        public static Packet Deserialize(byte[] data)
-        {
-            int packetID = BitConverter.ToInt32(data, 0);
-
-            int payloadLength = BitConverter.ToInt32(data, sizeof(int));
-
-            byte[] payloadData = new byte[payloadLength];
-            Array.Copy(data, sizeof(int) * 2, payloadData, 0, payloadLength);
-
-            Packet packet = new(packetID, payloadData);
-            return packet;
         }
     }
 }
