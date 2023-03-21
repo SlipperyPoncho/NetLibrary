@@ -8,19 +8,26 @@ namespace NetLib
     public class Client
     {
 
+        private bool _clientRunning = false;
+        private Thread _clientRunThread;
         private Connection connection;
         private IPEndPoint serverEndPoint;
 
-        public Client(IPEndPoint serverEndPoint, int port) 
+        public Client(IPEndPoint serverEndPoint) 
         {
             this.serverEndPoint = serverEndPoint;
-            connection = new(port);
-            connection.Start();
+            connection = new();
+            connection.Connect(serverEndPoint);
+
+            _clientRunThread = new Thread(new ThreadStart(_clientRunLoop));
         }
 
         public void Start()
         {
+            _clientRunning = true;
             connection.Start();
+            _clientRunThread.Start();
+            Console.WriteLine($"[Client] Successfully started!");
         }
 
         public void Tick()
@@ -28,9 +35,37 @@ namespace NetLib
 
         }
 
-        public void Send(string msg)
+        public void SendString(string msg)
         {
-            connection.Send(serverEndPoint, msg);
+            connection.SendTCP(serverEndPoint, new TestPacket(msg));
+            connection.SendUDP(serverEndPoint, new TestPacket(msg));
+        }
+
+
+
+        private void _clientRunLoop() {
+            if (!_clientRunning) return;
+
+            while (_clientRunning) {
+                //read all incoming messages from connection
+                if (connection.Available()) {
+                    while (connection.Available()) {
+                        NetMessage msg = connection.GetMessage();
+
+                        switch (msg.packet.PacketType) {
+                            case PacketType.TestPacket:
+                                TestPacket tp = (TestPacket)msg.packet;
+                                Console.WriteLine($"[Client] Received TestPacket: \"{tp.Text}\"");
+                                break;
+                        }
+
+                    }
+                }
+                else {
+                    Thread.Sleep(1); //sleepy time
+                }
+            }
+
         }
     }
 }
