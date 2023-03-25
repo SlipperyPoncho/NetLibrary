@@ -21,7 +21,7 @@ namespace NetLib
             switch (packetType)
             {
                 case PacketType.TestPacket:
-                    TestPacket testPacket = new(Encoding.ASCII.GetString(payloadData))
+                    TestPacket testPacket = new(Encoding.Unicode.GetString(payloadData))
                     {
                         PacketID = packetID,
                         PacketType = packetType
@@ -37,12 +37,12 @@ namespace NetLib
             BinaryReader binaryReader = new(stream);
             int packetID = binaryReader.ReadInt32();
             PacketType packetType = (PacketType)binaryReader.ReadInt32();
-            _ = binaryReader.ReadInt32();
+            int payloadLength = binaryReader.ReadInt32();
 
             switch (packetType)
             {
                 case PacketType.TestPacket:
-                    TestPacket testPacket = new(binaryReader.ReadString())
+                    TestPacket testPacket = new(Encoding.Unicode.GetString(binaryReader.ReadBytes(payloadLength)))
                     {
                         PacketID = packetID,
                         PacketType = packetType,

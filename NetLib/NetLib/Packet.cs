@@ -42,7 +42,7 @@ namespace NetLib
             data = BitConverter.GetBytes(text.Length * sizeof(char));
             stream.Write(data, 0, data.Length);
 
-            data = Encoding.ASCII.GetBytes(text);
+            data = Encoding.Unicode.GetBytes(text);
             stream.Write(data, 0, data.Length);
 
             return stream.ToArray();

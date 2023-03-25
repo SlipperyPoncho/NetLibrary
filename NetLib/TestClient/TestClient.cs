@@ -6,16 +6,16 @@ class TestClient
     static void Main(string[] args)
     {
         Client client = new Client(
-            new IPEndPoint(IPAddress.Loopback, 11000), 12000
+            new IPEndPoint(IPAddress.Loopback, 11000)
             );
         client.Start();
-        client.Send("yo what's goin on bro");
+        client.SendString("yo what's goin on bro");
 
         string? input = "";
         while (input != "!exit") {
             input = Console.ReadLine();
             if (input != null) {
-                client.Send(input);
+                client.SendString(input);
             }
         }
     }
