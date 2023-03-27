@@ -18,13 +18,16 @@ namespace NetLib
 
         public class Server
         {
-            private Thread _serverRunThread;
+            //private Thread _serverRunThread;
+            private Task t_serverRunTask;
+            public bool Running { get => _serverRunning; }
             private bool _serverRunning = false;
             private Connection connection;
             public Server(int port) 
             { 
                 connection = new Connection(port);
-                _serverRunThread = new Thread(new ThreadStart(_serverRunLoop));
+                t_serverRunTask = new Task(_serverRunLoop);
+                //_serverRunThread = new Thread(new ThreadStart(_serverRunLoop));
             }
 
             public void Start()
@@ -32,9 +35,17 @@ namespace NetLib
                 _serverRunning = true;
 
                 connection.Start();
-                _serverRunThread.Start();
+                t_serverRunTask.Start();
+                //_serverRunThread.Start();
 
                 Console.WriteLine($"[Server] Successfully started! Listening for messages...");
+            }
+
+            public void SendString_All(string msg) {
+                //connection.SendTCP(serverEndPoint, new TestPacket(msg));
+                Console.WriteLine("[Server] start send all...");
+                connection.SendToAll(new TestPacket(msg));
+                //connection.SendToAll(new TestPacket(msg), true);
             }
 
             public void Tick()
@@ -42,6 +53,7 @@ namespace NetLib
 
             }
 
+            //------------------------separate task
             private void _serverRunLoop() {
                 if (!_serverRunning) return;
 
@@ -61,7 +73,7 @@ namespace NetLib
                         }
                     }
                     else {
-                        Thread.Sleep(1); //sleepy time
+                        Task.Delay(1); //sleepy time
                     }
                 }
 

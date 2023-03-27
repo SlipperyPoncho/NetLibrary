@@ -27,6 +27,9 @@ namespace NetLib
                         PacketType = packetType
                     };
                     return testPacket;
+                case PacketType.ConnectPacket:
+                    ConnectPacket conPacket = new(BitConverter.ToInt32(payloadData));
+                    return conPacket;
                 default:
                     return null;
             }
@@ -34,10 +37,14 @@ namespace NetLib
 
         public static Packet? ReadFromStream(NetworkStream stream)
         {
+            Console.WriteLine("[PacketReader] reading from stream: ");
             BinaryReader binaryReader = new(stream);
             int packetID = binaryReader.ReadInt32();
+            Console.WriteLine($" PacketID = {packetID}");
             PacketType packetType = (PacketType)binaryReader.ReadInt32();
+            Console.WriteLine($" PacketType = {packetType}");
             int payloadLength = binaryReader.ReadInt32();
+            Console.WriteLine($" Payload length = {payloadLength}\n");
 
             switch (packetType)
             {
@@ -48,6 +55,9 @@ namespace NetLib
                         PacketType = packetType,
                     };
                     return testPacket;
+                case PacketType.ConnectPacket:
+                    ConnectPacket conPacket = new(binaryReader.ReadInt32());
+                    return conPacket;
                 default:
                     return null;        
             }

@@ -6,5 +6,13 @@ class TestServer
     {
         Server server = new(11000);
         server.Start();
+
+        string? input = "";
+        while (server.Running) {
+            input = Console.ReadLine();
+            if (input != null) {
+                server.SendString_All(input);
+            }
+        }
     }
 }
