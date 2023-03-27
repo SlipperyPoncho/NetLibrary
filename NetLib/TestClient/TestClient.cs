@@ -9,7 +9,7 @@ class TestClient
             new IPEndPoint(IPAddress.Loopback, 11000)
             );
         client.Start();
-        client.SendString("yo what's goin on bro");
+        //client.SendString("yo what's goin on bro");
 
         string? input = "";
         while (input != "!exit") {

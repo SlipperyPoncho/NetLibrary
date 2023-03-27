@@ -16,8 +16,7 @@ namespace NetLib
         public Client(IPEndPoint serverEndPoint) 
         {
             this.serverEndPoint = serverEndPoint;
-            connection = new();
-            connection.Connect(serverEndPoint);
+            connection = new(0);
 
             _clientRunThread = new Thread(new ThreadStart(_clientRunLoop));
         }
@@ -28,6 +27,7 @@ namespace NetLib
             connection.Start();
             _clientRunThread.Start();
             Console.WriteLine($"[Client] Successfully started!");
+            connection.Connect(serverEndPoint);
         }
 
         public void Tick()
@@ -37,7 +37,7 @@ namespace NetLib
 
         public void SendString(string msg)
         {
-            connection.SendTCP(serverEndPoint, new TestPacket(msg));
+            //connection.SendTCP(serverEndPoint, new TestPacket(msg));
             connection.SendUDP(serverEndPoint, new TestPacket(msg));
         }
 
