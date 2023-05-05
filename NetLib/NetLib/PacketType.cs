@@ -6,5 +6,6 @@ namespace NetLib
     {
         TestPacket,
         ConnectPacket,
+        ConnectAckPacket,
     }
 }

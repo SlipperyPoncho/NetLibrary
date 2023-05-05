@@ -37,7 +37,7 @@ namespace NetLib
 
         public void SendString(string msg)
         {
-            //connection.SendTCP(serverEndPoint, new TestPacket(msg));
+            connection.SendTCP(serverEndPoint, new TestPacket(msg));
             connection.SendUDP(serverEndPoint, new TestPacket(msg));
         }
 

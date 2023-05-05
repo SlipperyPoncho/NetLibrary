@@ -188,7 +188,7 @@ namespace NetLib
                         while (stream.DataAvailable) {
                             Console.WriteLine($"[TCP] Received message from {client.Key}, reading...");
                             Packet? packet = PacketReader.ReadFromStream(stream);
-                            Console.WriteLine($"{packet.PacketType}");
+                            Console.WriteLine($"{packet!.PacketType}");
                             if(packet != null) 
                                 if(!handle_internal_packets(client.Key, packet))
                                     q_incomingMessages.Enqueue(new NetMessage { packet = packet, RecieveTime = DateTime.Now });

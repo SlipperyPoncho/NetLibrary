@@ -30,6 +30,9 @@ namespace NetLib
                 case PacketType.ConnectPacket:
                     ConnectPacket conPacket = new(BitConverter.ToInt32(payloadData));
                     return conPacket;
+                case PacketType.ConnectAckPacket:
+                    ConnectAckPacket conAckPacket = new(BitConverter.ToInt32(payloadData));
+                    return conAckPacket;
                 default:
                     return null;
             }
@@ -58,6 +61,9 @@ namespace NetLib
                 case PacketType.ConnectPacket:
                     ConnectPacket conPacket = new(binaryReader.ReadInt32());
                     return conPacket;
+                case PacketType.ConnectAckPacket:
+                    ConnectAckPacket conAckPacket = new(binaryReader.ReadInt32());
+                    return conAckPacket;
                 default:
                     return null;        
             }

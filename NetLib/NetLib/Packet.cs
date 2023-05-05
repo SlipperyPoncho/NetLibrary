@@ -47,6 +47,29 @@ namespace NetLib
         }
     }
 
+    public class ConnectAckPacket : Packet {
+        private int key;
+        public int Key { get => key; set => key = value; }
+        public ConnectAckPacket(int key) {
+            this.key = key;
+            PacketType = PacketType.ConnectAckPacket;
+        }
+
+        public override byte[] GetRaw() {
+            MemoryStream stream = new();
+            byte[] data = BitConverter.GetBytes(PacketID);
+            stream.Write(data, 0, data.Length);
+
+            data = BitConverter.GetBytes((int)PacketType);
+            stream.Write(data, 0, data.Length);
+
+            data = BitConverter.GetBytes(key);
+            stream.Write(data, 0, data.Length);
+
+            return stream.ToArray();
+        }
+    }
+
     public class TestPacket : Packet
     {
         private string text;
