@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NetLib.Packets;
+using System;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
@@ -6,10 +7,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 
 
-namespace NetLib
-{
-    namespace Server
-    {
+namespace NetLib {
+    namespace Server {
         public struct ClientRepresentation //probably not needed
         {
             public IPEndPoint address;

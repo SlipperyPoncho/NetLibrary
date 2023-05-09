@@ -1,8 +1,8 @@
+using NetLib.Packets;
 using System.Net.Sockets;
 using System.Text;
 
-namespace NetLib
-{
+namespace NetLib {
     public static class PacketReader
     {
         public static Packet? ReadFromRaw(byte[] data)

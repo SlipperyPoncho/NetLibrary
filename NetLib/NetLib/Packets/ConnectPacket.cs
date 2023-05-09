@@ -1,6 +1,6 @@
 ﻿// seq is no longer needed for packets (so is the isReliable flag)
-namespace NetLib
-{
+
+namespace NetLib.Packets {
     public class ConnectPacket : Packet {
         private int udpPort;
         public int UdpPort { get => udpPort; set => udpPort = value; }
@@ -17,6 +17,9 @@ namespace NetLib
             stream.Write(data, 0, data.Length);
 
             data = BitConverter.GetBytes((int)PacketType);
+            stream.Write(data, 0, data.Length);
+
+            data = BitConverter.GetBytes(Sender);
             stream.Write(data, 0, data.Length);
 
             data = BitConverter.GetBytes(sizeof(int));

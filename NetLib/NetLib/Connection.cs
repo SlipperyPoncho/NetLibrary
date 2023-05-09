@@ -3,12 +3,12 @@ using System.Net;
 using System.Net.Sockets;
 using System.Collections.Concurrent;
 using System.Text;
+using NetLib.Packets;
 
 
 //TODO: fix all nullable underlines cause they piss me off
 // properly handle disconnections (that would probably work through some sort of disconnectpacket + heartbeats
-namespace NetLib
-{
+namespace NetLib {
     public class ClientInfo {
         public TcpClient? clientTCP;
         public IPEndPoint? clientUDPEndPoint;

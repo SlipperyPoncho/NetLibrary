@@ -1,27 +1,26 @@
 ﻿using System.Text;
 
-namespace NetLib
-{
-    public class TestPacket : Packet
-    {
+namespace NetLib.Packets {
+    public class TestPacket : Packet {
         private string text;
 
         public string Text { get => text; set => text = value; }
 
-        public TestPacket(string text)
-        {
+        public TestPacket(string text) {
             this.text = text;
             PacketType = PacketType.TestPacket;
         }
 
-        public override byte[] GetRaw()
-        {
+        public override byte[] GetRaw() {
             MemoryStream stream = new();
 
             byte[] data = BitConverter.GetBytes(PacketID);
             stream.Write(data, 0, data.Length);
 
             data = BitConverter.GetBytes((int)PacketType);
+            stream.Write(data, 0, data.Length);
+
+            data = BitConverter.GetBytes(Sender);
             stream.Write(data, 0, data.Length);
 
             data = BitConverter.GetBytes(text.Length * sizeof(char));
