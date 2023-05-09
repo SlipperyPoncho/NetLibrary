@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace NetLib
 {
@@ -30,6 +26,9 @@ namespace NetLib
                 case PacketType.ConnectPacket:
                     ConnectPacket conPacket = new(BitConverter.ToInt32(payloadData));
                     return conPacket;
+                case PacketType.HeartbeatPacket:
+                    HeartbeatPacket heartbeatPacket = new(new DateTime(BitConverter.ToInt32(payloadData)));
+                    return heartbeatPacket;
                 default:
                     return null;
             }
@@ -58,6 +57,9 @@ namespace NetLib
                 case PacketType.ConnectPacket:
                     ConnectPacket conPacket = new(binaryReader.ReadInt32());
                     return conPacket;
+                case PacketType.HeartbeatPacket:
+                    HeartbeatPacket heartbeatPacket = new(new DateTime(binaryReader.ReadInt32()));
+                    return heartbeatPacket;
                 default:
                     return null;        
             }
