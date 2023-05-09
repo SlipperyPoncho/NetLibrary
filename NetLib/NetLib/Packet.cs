@@ -9,9 +9,12 @@ namespace NetLib
     {
         private int packetID;
         private PacketType packetType;
+        private uint sender_key;
+        
 
         public int PacketID { get => packetID; set => packetID = value; }
         public PacketType PacketType { get => packetType; set => packetType = value; }
+        public uint Sender { get => sender_key; set => sender_key = value; }
 
         public abstract byte[] GetRaw();
     }

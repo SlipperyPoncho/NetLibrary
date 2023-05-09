@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace NetLib
 {
@@ -6,7 +6,8 @@ namespace NetLib
     {
         TestPacket,
         ConnectPacket,
+        ConnectAckPacket,
         HeartbeatPacket,
-        DisconnectPacket
+        DisconnectPacket,
     }
 }

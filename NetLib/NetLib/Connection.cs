@@ -26,7 +26,13 @@ namespace NetLib
     public class Connection
     {
         private ConcurrentQueue<NetMessage> q_incomingMessages = new();
-        public ConcurrentDictionary<IPEndPoint, ClientInfo> activeClients = new();
+        //public ConcurrentDictionary<IPEndPoint, ClientInfo> activeClients = new();
+        public ConcurrentDictionary<uint, ClientInfo> activeClients = new();
+        private uint max_connections = 100;
+        private Queue<uint> availableIds;
+
+        private uint connection_key = 0;
+        public void SetConnectionKey(uint key) { this.connection_key = key; }
 
         private CancellationTokenSource t_cts = new();
         private CancellationToken t_ct;
@@ -40,6 +46,7 @@ namespace NetLib
         private bool _connectionRunning = false;
         private int port;
 
+
         public Connection(int port = 0) {
             this.port = port;
 
@@ -49,6 +56,9 @@ namespace NetLib
             t_ct = t_cts.Token;
             t_networkTcpListener = new Task(_networkTcpReceive, t_ct);
             t_networkUdpListener = new Task(_networkUdpReceive, t_ct);
+
+            availableIds = new Queue<uint>();
+            for (uint i = 2; i <= max_connections; i++) availableIds.Enqueue(i); // 1 is the server i guess
         }
         
         public void Start() {
@@ -82,6 +92,13 @@ namespace NetLib
             activeClients.Clear();
         }
 
+        private uint GetAvailableClientId() {
+            if (availableIds.Count > 0)
+                return availableIds.Dequeue();
+            Console.WriteLine("Ran out of client id's");
+            return 0;
+        }
+
         public bool Available() {
             return !q_incomingMessages.IsEmpty;
         }
@@ -91,14 +108,15 @@ namespace NetLib
             return result;
         }
 
-        public void Connect(IPEndPoint receiver) {
+        public void ConnectToServer(IPEndPoint receiver) {
             TcpClient client = new(receiver.Address.ToString(), receiver.Port);
-            registerActiveClient(receiver, client);
-            SendTCP(receiver, new ConnectPacket(((IPEndPoint)udpListener.Client.LocalEndPoint!).Port));
+            activeClients.TryAdd(1, new ClientInfo() { clientTCP = client, clientUDPEndPoint = receiver });
+            SendTCP(1, new ConnectPacket(((IPEndPoint)udpListener.Client.LocalEndPoint!).Port));
         }
 
-        public void SendTCP(IPEndPoint receiver, Packet packet) { // i have no idea with this networkstream ting if i should read first to clear the stream... probably a TODO thing
+        public void SendTCP(uint receiver, Packet packet) { // i have no idea with this networkstream ting if i should read first to clear the stream... probably a TODO thing
             Console.WriteLine($"[TCP] Sending message to {receiver}");
+            packet.Sender = connection_key;
             byte[] data = packet.GetRaw();
 
             if (!activeClients.TryGetValue(receiver, out ClientInfo? client)) return; //get client
@@ -108,16 +126,17 @@ namespace NetLib
             stream.Write(data, 0, data.Length);
         }
 
-        public void SendUDP(IPEndPoint receiver, Packet packet) {
+        public void SendUDP(uint receiver, Packet packet) {
+            packet.Sender = connection_key;
             byte[] data = packet.GetRaw();
             activeClients.TryGetValue(receiver, out ClientInfo client);
-            Console.WriteLine($"[UDP] Sending message to {client.clientUDPEndPoint}");
+            Console.WriteLine($"[UDP] Sending message to {receiver}");
             udpListener.Send(data, client.clientUDPEndPoint);
         }
 
         public void SendToAll(Packet packet, bool useTcp = false) {
             Console.WriteLine("[Connection] Starting parallel foreach...");
-            Parallel.ForEach(activeClients, (KeyValuePair<IPEndPoint, ClientInfo> client) => {
+            Parallel.ForEach(activeClients, (KeyValuePair<uint, ClientInfo> client) => {
                 if (useTcp) SendTCP(client.Key, packet);
                 else SendUDP(client.Key, packet);
             });
@@ -125,21 +144,33 @@ namespace NetLib
 
         public void registerActiveClient(IPEndPoint endPoint, TcpClient client) { ////client side ONLY
             if (endPoint == null) return;
-            activeClients.TryAdd(endPoint, new ClientInfo() { clientTCP = client, clientUDPEndPoint = endPoint} );
+            uint newId = GetAvailableClientId();
+            activeClients.TryAdd(newId, new ClientInfo() { clientTCP = client, clientUDPEndPoint = endPoint });
+            //activeClients.TryAdd(endPoint, new ClientInfo() { clientTCP = client, clientUDPEndPoint = endPoint} );
         }
 
 
-        private bool handle_internal_packets(IPEndPoint sender, Packet packet) {
+        private bool handle_internal_packets(uint sender, Packet packet) {
             switch (packet.PacketType) {
                 case PacketType.ConnectPacket:
                     Console.WriteLine("[Connection] Got connectpacket, bruh");
                     if (!activeClients.TryGetValue(sender, out ClientInfo? client)) return true; // what
-                    if(client == null) return true;                                              //also what
+                    if(client == null) return true;                                              // also what
 
                     ConnectPacket cp = (ConnectPacket)packet;
-                    client.clientUDPEndPoint = new IPEndPoint(sender.Address, cp.UdpPort);
+                    client.clientUDPEndPoint = new IPEndPoint((client.clientTCP.Client.RemoteEndPoint as IPEndPoint).Address, cp.UdpPort);
+
+                    ConnectAckPacket cap = new ConnectAckPacket(sender);
+                    SendTCP(sender, cap);
 
                     return true;
+
+                case PacketType.ConnectAckPacket:
+                    ConnectAckPacket cap_recv = (ConnectAckPacket)packet;
+                    this.connection_key = cap_recv.Key;
+                    Console.WriteLine($"[Connection] НОВЫЙ ГОД получили в подарок ключ!!: {cap_recv.Key}");
+                    return true;
+
                 default: return false;
             }
         }
@@ -154,41 +185,24 @@ namespace NetLib
                     TcpClient client = tcpListener.AcceptTcpClient(); //blocking 
                     Console.WriteLine($"New client connected: {client.Client.RemoteEndPoint}"); //TODO: some sort of client checking so that we dont accept random connections
 
-                    //NetworkStream stream = client.GetStream();    //This does not work for more than one client (???)
-                    //if (stream.DataAvailable) {
-                    //    while (stream.DataAvailable) {
-                    //        Console.WriteLine($"[TCP] Expecting ConnectPacket, reading...");
-                    //        Packet? packet = PacketReader.ReadFromStream(stream);
-                    //        if (packet != null) {
-                    //            if (packet.PacketType == PacketType.ConnectPacket) {
-                    //                IPEndPoint sender = client.Client.RemoteEndPoint as IPEndPoint;
-                    //                ConnectPacket cp = (ConnectPacket)packet;
-                    //                ClientInfo newClient = new ClientInfo { clientTCP = client, clientUDP = new() };
-                    //                newClient.clientUDP.Connect(sender.Address, cp.UdpPort);
-                    //                activeClients.TryAdd(sender, newClient);
-                    //                Console.WriteLine($"[TCP] Successfully connected client {sender}!\n");
-                    //            }
-                    //            else Console.WriteLine("    Packet was not of type ConnectPacket");
-                    //        }
-                    //        else Console.WriteLine("    ConnectPacket was null...");
-                    //    }
-                    //}
-
-                    if (client.Client.RemoteEndPoint != null)
-                        activeClients.TryAdd(client.Client.RemoteEndPoint as IPEndPoint, new ClientInfo { clientTCP = client }); //accept connection and add to active connections
+                    uint newId = 0;
+                    if (client.Client.RemoteEndPoint != null) {
+                        newId = GetAvailableClientId();
+                        activeClients.TryAdd(newId, new ClientInfo { clientTCP = client }); //accept connection and add to active connections
+                    }
 
                     //might want to do smth here like send a greeting message or whatever
                     //or probably should read the connectPacket uuhhhh idk
-                    SendTCP(client.Client.RemoteEndPoint as IPEndPoint, new TestPacket("oh, hi!!"));
+                    SendTCP(newId, new TestPacket("oh, hi!!"));
                 }
 
-                Parallel.ForEach(activeClients, (KeyValuePair<IPEndPoint, ClientInfo> client) => {  //read all incoming messages (this is probably wrong i have no idea)
+                Parallel.ForEach(activeClients, (KeyValuePair<uint, ClientInfo> client) => {  //read all incoming messages (this is probably wrong i have no idea)
                     NetworkStream stream = client.Value.clientTCP.GetStream();
                     if (stream.DataAvailable) {
                         while (stream.DataAvailable) {
                             Console.WriteLine($"[TCP] Received message from {client.Key}, reading...");
                             Packet? packet = PacketReader.ReadFromStream(stream);
-                            Console.WriteLine($"{packet.PacketType}");
+                            Console.WriteLine($"{packet!.PacketType}");
                             if(packet != null) 
                                 if(!handle_internal_packets(client.Key, packet))
                                     q_incomingMessages.Enqueue(new NetMessage { packet = packet, RecieveTime = DateTime.Now });
@@ -210,10 +224,12 @@ namespace NetLib
             while (_connectionRunning && !t_ct.IsCancellationRequested) {
                 if(udpListener.Available > 0) { //UDP Listen
                     byte[] data = udpListener.Receive(ref connection);
-                    Console.WriteLine($"[UDP] Received message from {connection}, reading...");
                     Packet? packet = PacketReader.ReadFromRaw(data);
-                    if(packet != null)
-                        q_incomingMessages.Enqueue(new NetMessage { packet = packet, RecieveTime = DateTime.Now });
+                    uint sender = packet.Sender;
+                    Console.WriteLine($"[UDP] Received message from {sender}, reading...");
+                    if (packet != null)
+                        if (!handle_internal_packets(sender, packet))
+                            q_incomingMessages.Enqueue(new NetMessage { packet = packet, RecieveTime = DateTime.Now });
                 }
                 else {
                     Task.Delay(1); //nothing to do => sleepy time 

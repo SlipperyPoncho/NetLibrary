@@ -27,7 +27,7 @@ namespace NetLib
             connection.Start();
             _clientRunThread.Start();
             Console.WriteLine($"[Client] Successfully started!");
-            connection.Connect(serverEndPoint);
+            connection.ConnectToServer(serverEndPoint);
         }
 
         public void Tick()
@@ -37,8 +37,8 @@ namespace NetLib
 
         public void SendString(string msg)
         {
-            //connection.SendTCP(serverEndPoint, new TestPacket(msg));
-            connection.SendUDP(serverEndPoint, new TestPacket(msg));
+            //connection.SendTCP(1, new TestPacket(msg));
+            connection.SendUDP(1, new TestPacket(msg));
         }
 
 
