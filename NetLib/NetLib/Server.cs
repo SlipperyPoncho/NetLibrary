@@ -48,6 +48,14 @@ namespace NetLib {
                 //connection.SendToAll(new TestPacket(msg), true);
             }
 
+            public void SendHeartbeat_All(DateTime time)
+            {
+                //connection.SendTCP(serverEndPoint, new TestPacket(msg));
+                Console.WriteLine("[Server] start send all...");
+                connection.SendToAll(new HeartbeatPacket(time));
+                //connection.SendToAll(new TestPacket(msg), true);
+            }
+
             public void Tick()
             {
 

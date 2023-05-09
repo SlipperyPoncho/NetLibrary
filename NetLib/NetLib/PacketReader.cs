@@ -53,8 +53,26 @@ namespace NetLib {
                     return conAckPacket;
                 
                 case PacketType.HeartbeatPacket:
-                    HeartbeatPacket heartbeatPacket = new(new DateTime(BitConverter.ToInt32(payloadData)));
+                    HeartbeatPacket heartbeatPacket = new(new DateTime(BitConverter.ToInt64(payloadData)))
+                    {
+                        Sender = sender,
+                    };
                     return heartbeatPacket;
+
+                case PacketType.HeartbeatAckPacket:
+                    HeartbeatAckPacket heartbeatAckPacket = new(new DateTime(BitConverter.ToInt64(payloadData)))
+                    {
+                        Sender = sender,
+                    };
+                    return heartbeatAckPacket;
+
+                case PacketType.DisconnectPacket:
+                    DisconnectPacket disconnectPacket = new(Encoding.Unicode.GetString(payloadData))
+                    {
+                        PacketType = packetType,
+                        Sender = sender,
+                    };
+                    return disconnectPacket;
 
                 default:
                     return null;
@@ -101,8 +119,26 @@ namespace NetLib {
                     return conAckPacket;
 
                 case PacketType.HeartbeatPacket:
-                    HeartbeatPacket heartbeatPacket = new(new DateTime(binaryReader.ReadInt32()));
+                    HeartbeatPacket heartbeatPacket = new(new DateTime(binaryReader.ReadInt64()))
+                    {
+                        Sender = sender,
+                    };
                     return heartbeatPacket;
+
+                case PacketType.HeartbeatAckPacket:
+                    HeartbeatAckPacket heartbeatAckPacket = new(new DateTime(binaryReader.ReadInt64()))
+                    {
+                        Sender = sender,
+                    };
+                    return heartbeatAckPacket;
+
+                case PacketType.DisconnectPacket:
+                    DisconnectPacket disconnectPacket = new(Encoding.Unicode.GetString(binaryReader.ReadBytes(payloadLength)))
+                    {
+                        PacketType = packetType,
+                        Sender = sender,
+                    };
+                    return disconnectPacket;
 
                 default:
                     return null;        

@@ -41,7 +41,11 @@ namespace NetLib {
             connection.SendUDP(1, new TestPacket(msg));
         }
 
-
+        public void SendDisconnect(string msg)
+        {
+            //connection.SendTCP(1, new TestPacket(msg));
+            connection.SendUDP(1, new DisconnectPacket(msg));
+        }
 
         private void _clientRunLoop() {
             if (!_clientRunning) return;

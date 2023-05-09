@@ -18,5 +18,6 @@ class TestClient
                 client.SendString(input);
             }
         }
+        client.SendDisconnect("Doog");
     }
 }

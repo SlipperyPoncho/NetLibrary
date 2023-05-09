@@ -21,13 +21,13 @@ namespace NetLib.Packets {
             data = BitConverter.GetBytes((int)PacketType);
             stream.Write(data, 0, data.Length);
 
-            data = BitConverter.GetBytes((uint)Sender);
+            data = BitConverter.GetBytes(Sender);
             stream.Write(data, 0, data.Length);
 
             data = BitConverter.GetBytes(sizeof(uint));
             stream.Write(data, 0, data.Length);
 
-            data = BitConverter.GetBytes((uint)key);
+            data = BitConverter.GetBytes(key);
             stream.Write(data, 0, data.Length);
 
             return stream.ToArray();

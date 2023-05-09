@@ -28,7 +28,7 @@ namespace NetLib {
         private ConcurrentQueue<NetMessage> q_incomingMessages = new();
         //public ConcurrentDictionary<IPEndPoint, ClientInfo> activeClients = new();
         public ConcurrentDictionary<uint, ClientInfo> activeClients = new();
-        private uint max_connections = 100;
+        private uint max_connections = 3;
         private Queue<uint> availableIds;
 
         private uint connection_key = 0;
@@ -169,6 +169,23 @@ namespace NetLib {
                     ConnectAckPacket cap_recv = (ConnectAckPacket)packet;
                     this.connection_key = cap_recv.Key;
                     Console.WriteLine($"[Connection] НОВЫЙ ГОД получили в подарок ключ!!: {cap_recv.Key}");
+                    return true;
+
+                case PacketType.HeartbeatPacket:
+                    HeartbeatPacket hp = (HeartbeatPacket)packet;
+                    HeartbeatAckPacket hap = new HeartbeatAckPacket(hp.TimeStamp);
+                    SendUDP(sender, hap);
+                    return true;
+
+                case PacketType.HeartbeatAckPacket:
+                    HeartbeatAckPacket hap_recv = (HeartbeatAckPacket)packet;
+                    Console.WriteLine($"[Connection] heartbeat: {(DateTime.Now - hap_recv.TimeStamp).Milliseconds}ms");
+                    return true;
+
+                case PacketType.DisconnectPacket:
+                    activeClients.TryRemove(sender, out _);
+                    availableIds.Enqueue(sender);
+                    Console.WriteLine($"[Connection] Client {sender} disconnected!");
                     return true;
 
                 default: return false;

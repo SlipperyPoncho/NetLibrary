@@ -10,8 +10,12 @@ class TestServer
         string? input = "";
         while (server.Running) {
             input = Console.ReadLine();
-            if (input != null) {
+            if (input != null && input != "h") {
                 server.SendString_All(input);
+            }
+            if (input == "h")
+            {
+                server.SendHeartbeat_All(DateTime.Now);
             }
         }
     }

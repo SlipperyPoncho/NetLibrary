@@ -8,6 +8,7 @@ namespace NetLib
         ConnectPacket,
         ConnectAckPacket,
         HeartbeatPacket,
+        HeartbeatAckPacket,
         DisconnectPacket,
     }
 }

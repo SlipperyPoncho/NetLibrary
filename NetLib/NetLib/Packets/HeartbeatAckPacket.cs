@@ -1,19 +1,17 @@
-﻿using System.Text;
-
-namespace NetLib.Packets {
-    public class DisconnectPacket : Packet 
+﻿namespace NetLib.Packets
+{
+    public class HeartbeatAckPacket : Packet
     {
-        private string msg;
+        private DateTime timeStamp;
+        public DateTime TimeStamp { get => timeStamp; set => timeStamp = value; }
 
-        public string Msg { get => msg; set => msg = value; }
-
-        public DisconnectPacket(string msg) 
+        public HeartbeatAckPacket(DateTime stamp)
         {
-            this.msg = msg;
-            PacketType = PacketType.DisconnectPacket;
+            timeStamp = stamp;
+            PacketType = PacketType.HeartbeatAckPacket;
         }
 
-        public override byte[] GetRaw() 
+        public override byte[] GetRaw()
         {
             MemoryStream stream = new();
 
@@ -26,10 +24,10 @@ namespace NetLib.Packets {
             data = BitConverter.GetBytes(Sender);
             stream.Write(data, 0, data.Length);
 
-            data = BitConverter.GetBytes(msg.Length * sizeof(char));
+            data = BitConverter.GetBytes(sizeof(long));
             stream.Write(data, 0, data.Length);
 
-            data = Encoding.Unicode.GetBytes(msg);
+            data = BitConverter.GetBytes(timeStamp.Ticks);
             stream.Write(data, 0, data.Length);
 
             return stream.ToArray();
