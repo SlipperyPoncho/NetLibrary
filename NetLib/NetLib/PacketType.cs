@@ -6,5 +6,7 @@ namespace NetLib
     {
         TestPacket,
         ConnectPacket,
+        HeartbeatPacket,
+        DisconnectPacket
     }
 }
