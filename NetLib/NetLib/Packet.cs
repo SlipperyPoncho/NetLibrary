@@ -11,9 +11,12 @@ namespace NetLib
     {
         private int packetID;
         private PacketType packetType;
+        private uint sender_key;
+        
 
         public int PacketID { get => packetID; set => packetID = value; }
         public PacketType PacketType { get => packetType; set => packetType = value; }
+        public uint Sender { get => sender_key; set => sender_key = value; }
 
         public abstract byte[] GetRaw();
     }
@@ -37,6 +40,9 @@ namespace NetLib
             data = BitConverter.GetBytes((int)PacketType);
             stream.Write(data, 0, data.Length);
 
+            data = BitConverter.GetBytes((uint)Sender);
+            stream.Write(data, 0, data.Length);
+
             data = BitConverter.GetBytes(sizeof(int));
             stream.Write(data, 0, data.Length);
 
@@ -48,9 +54,9 @@ namespace NetLib
     }
 
     public class ConnectAckPacket : Packet {
-        private int key;
-        public int Key { get => key; set => key = value; }
-        public ConnectAckPacket(int key) {
+        private uint key;
+        public uint Key { get => key; set => key = value; }
+        public ConnectAckPacket(uint key) {
             this.key = key;
             PacketType = PacketType.ConnectAckPacket;
         }
@@ -63,7 +69,13 @@ namespace NetLib
             data = BitConverter.GetBytes((int)PacketType);
             stream.Write(data, 0, data.Length);
 
-            data = BitConverter.GetBytes(key);
+            data = BitConverter.GetBytes((uint)Sender);
+            stream.Write(data, 0, data.Length);
+
+            data = BitConverter.GetBytes(sizeof(uint));
+            stream.Write(data, 0, data.Length);
+
+            data = BitConverter.GetBytes((uint)key);
             stream.Write(data, 0, data.Length);
 
             return stream.ToArray();
@@ -90,6 +102,9 @@ namespace NetLib
             stream.Write(data, 0, data.Length);
 
             data = BitConverter.GetBytes((int)PacketType);
+            stream.Write(data, 0, data.Length);
+
+            data = BitConverter.GetBytes((uint)Sender);
             stream.Write(data, 0, data.Length);
 
             data = BitConverter.GetBytes(text.Length * sizeof(char));

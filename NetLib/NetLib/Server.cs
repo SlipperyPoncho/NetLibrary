@@ -26,6 +26,7 @@ namespace NetLib
             public Server(int port) 
             { 
                 connection = new Connection(port);
+                connection.SetConnectionKey(1);
                 t_serverRunTask = new Task(_serverRunLoop);
                 //_serverRunThread = new Thread(new ThreadStart(_serverRunLoop));
             }
