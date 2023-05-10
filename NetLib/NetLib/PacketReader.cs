@@ -5,9 +5,12 @@ using System.Text;
 namespace NetLib {
     public static class PacketReader
     {
-        public static byte[] ReadInt(byte[] data, out int result) { // TODO
+        public static byte[] ReadInt(byte[] data, out int result) 
+        {
+            byte[] payload = new byte[data.Length - sizeof(int)];
+            Array.Copy(data, sizeof(int), payload, 0, payload.Length);
             result = BitConverter.ToInt32(data, 0);
-            return 
+            return payload;
         }
 
         public static Packet? ReadFromRaw(byte[] data)
