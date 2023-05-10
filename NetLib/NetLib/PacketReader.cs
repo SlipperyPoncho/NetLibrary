@@ -5,6 +5,11 @@ using System.Text;
 namespace NetLib {
     public static class PacketReader
     {
+        public static byte[] ReadInt(byte[] data, out int result) { // TODO
+            result = BitConverter.ToInt32(data, 0);
+            return 
+        }
+
         public static Packet? ReadFromRaw(byte[] data)
         {
             Console.WriteLine("[PacketReader] reading from raw: ");
@@ -55,6 +60,8 @@ namespace NetLib {
                 case PacketType.HeartbeatPacket:
                     HeartbeatPacket heartbeatPacket = new(new DateTime(BitConverter.ToInt64(payloadData)))
                     {
+                        PacketID = packetID,
+                        PacketType = packetType,
                         Sender = sender,
                     };
                     return heartbeatPacket;
@@ -62,6 +69,8 @@ namespace NetLib {
                 case PacketType.HeartbeatAckPacket:
                     HeartbeatAckPacket heartbeatAckPacket = new(new DateTime(BitConverter.ToInt64(payloadData)))
                     {
+                        PacketID = packetID,
+                        PacketType = packetType,
                         Sender = sender,
                     };
                     return heartbeatAckPacket;
@@ -69,13 +78,19 @@ namespace NetLib {
                 case PacketType.DisconnectPacket:
                     DisconnectPacket disconnectPacket = new(Encoding.Unicode.GetString(payloadData))
                     {
+                        PacketID = packetID,
                         PacketType = packetType,
                         Sender = sender,
                     };
                     return disconnectPacket;
 
                 default:
-                    return null;
+                    PartialPacket pp = new(payloadData) {
+                        PacketID = packetID,
+                        PacketType = packetType,
+                        Sender = sender,
+                    };
+                    return pp;
             }
         }
 
@@ -108,12 +123,16 @@ namespace NetLib {
                 
                 case PacketType.ConnectPacket:
                     ConnectPacket conPacket = new(binaryReader.ReadInt32()) {
+                        PacketID = packetID,
+                        PacketType = packetType,
                         Sender = sender,
                     };
                     return conPacket;
                 
                 case PacketType.ConnectAckPacket:
                     ConnectAckPacket conAckPacket = new(binaryReader.ReadUInt32()) {
+                        PacketID = packetID,
+                        PacketType = packetType,
                         Sender = sender,
                     };
                     return conAckPacket;
@@ -121,6 +140,8 @@ namespace NetLib {
                 case PacketType.HeartbeatPacket:
                     HeartbeatPacket heartbeatPacket = new(new DateTime(binaryReader.ReadInt64()))
                     {
+                        PacketID = packetID,
+                        PacketType = packetType,
                         Sender = sender,
                     };
                     return heartbeatPacket;
@@ -128,6 +149,8 @@ namespace NetLib {
                 case PacketType.HeartbeatAckPacket:
                     HeartbeatAckPacket heartbeatAckPacket = new(new DateTime(binaryReader.ReadInt64()))
                     {
+                        PacketID = packetID,
+                        PacketType = packetType,
                         Sender = sender,
                     };
                     return heartbeatAckPacket;
@@ -135,13 +158,19 @@ namespace NetLib {
                 case PacketType.DisconnectPacket:
                     DisconnectPacket disconnectPacket = new(Encoding.Unicode.GetString(binaryReader.ReadBytes(payloadLength)))
                     {
+                        PacketID = packetID,   
                         PacketType = packetType,
                         Sender = sender,
                     };
                     return disconnectPacket;
 
                 default:
-                    return null;        
+                    PartialPacket pp = new PartialPacket(binaryReader.ReadBytes(payloadLength)) {
+                        PacketID = packetID,
+                        PacketType = packetType,
+                        Sender = sender,
+                    };
+                    return pp;        
             }
         }
     }

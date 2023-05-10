@@ -27,7 +27,6 @@ namespace NetLib {
                 connection = new Connection(port);
                 connection.SetConnectionKey(1);
                 t_serverRunTask = new Task(_serverRunLoop);
-                //_serverRunThread = new Thread(new ThreadStart(_serverRunLoop));
             }
 
             public void Start()
@@ -36,24 +35,19 @@ namespace NetLib {
 
                 connection.Start();
                 t_serverRunTask.Start();
-                //_serverRunThread.Start();
 
                 Console.WriteLine($"[Server] Successfully started! Listening for messages...");
             }
 
             public void SendString_All(string msg) {
-                //connection.SendTCP(serverEndPoint, new TestPacket(msg));
                 Console.WriteLine("[Server] start send all...");
                 connection.SendToAll(new TestPacket(msg));
-                //connection.SendToAll(new TestPacket(msg), true);
             }
 
             public void SendHeartbeat_All(DateTime time)
             {
-                //connection.SendTCP(serverEndPoint, new TestPacket(msg));
                 Console.WriteLine("[Server] start send all...");
                 connection.SendToAll(new HeartbeatPacket(time));
-                //connection.SendToAll(new TestPacket(msg), true);
             }
 
             public void Tick()
