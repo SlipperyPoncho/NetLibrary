@@ -54,6 +54,7 @@ namespace NetLib_NETStandart {
             this.port = port;
 
             tcpListener = new TcpListener(IPAddress.Loopback, port);
+            //if (port != 0) port+=2;
             udpListener = new UdpClient(port);
 
             t_ct = t_cts.Token;
@@ -62,6 +63,10 @@ namespace NetLib_NETStandart {
 
             availableIds = new Queue<uint>();
             for (uint i = 2; i <= max_connections; i++) availableIds.Enqueue(i); // 1 is the server i guess
+        }
+
+        ~Connection() {
+            udpListener.Close();
         }
         
         public void Start() {
@@ -113,6 +118,7 @@ namespace NetLib_NETStandart {
 
         public void ConnectToServer(IPEndPoint receiver) {
             TcpClient client = new TcpClient(receiver.Address.ToString(), receiver.Port);
+            //IPEndPoint serverUDP = new IPEndPoint(receiver.Address, receiver.Port + 2);
             activeClients.TryAdd(1, new ClientInfo() { clientTCP = client, clientUDPEndPoint = receiver });
             SendTCP(1, new ConnectPacket(((IPEndPoint)udpListener.Client.LocalEndPoint!).Port));
         }

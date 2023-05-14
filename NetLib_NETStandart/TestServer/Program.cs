@@ -2,7 +2,7 @@
 
 class TestServer {
     static void Main(string[] args) {
-        Server server = new(11000);
+        Server server = new(12000);
         server.Start();
 
         string? input = "";

@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NetLib_NETStandart.Packets;
 
-
+// GET incoming partial packets
 namespace NetLib_NETStandart {
     namespace Server {
         public struct ClientRepresentation //probably not needed
@@ -23,6 +23,9 @@ namespace NetLib_NETStandart {
             public bool Running { get => _serverRunning; }
             private bool _serverRunning = false;
             private Connection connection;
+
+            public ConcurrentQueue<NetMessage> q_incomingMessages = new ConcurrentQueue<NetMessage>();
+
             public Server(int port) 
             { 
                 connection = new Connection(port);
@@ -71,6 +74,10 @@ namespace NetLib_NETStandart {
                                     TestPacket tp = (TestPacket)msg.packet;
                                     Console.WriteLine($"[Server] Received TestPacket: \"{tp.Text}\"");
                                     break;
+                                default:
+                                    q_incomingMessages.Enqueue(msg);
+                                    break;
+
                             }
 
                         }

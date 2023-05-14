@@ -15,6 +15,20 @@ namespace NetLib_NETStandart {
             return payload;
         }
 
+        public static byte[] ReadFloat(byte[] data, out float result) {
+            byte[] payload = new byte[data.Length - sizeof(float)];
+            Array.Copy(data, sizeof(float), payload, 0, payload.Length);
+            result = BitConverter.ToSingle(data, 0);
+            return payload;
+        }
+
+        public static byte[] ReadBool(byte[] data, out bool result) {
+            byte[] payload = new byte[data.Length - sizeof(bool)];
+            Array.Copy(data, sizeof(bool), payload, 0, payload.Length);
+            result = BitConverter.ToBoolean(data, 0);
+            return payload;
+        }
+
         public static Packet? ReadFromRaw(byte[] data)
         {
             Console.WriteLine("[PacketReader] reading from raw: ");
