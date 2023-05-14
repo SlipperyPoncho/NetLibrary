@@ -1,8 +1,10 @@
-using NetLib.Packets;
+using NetLib_NETStandart.Packets;
+using System;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 
-namespace NetLib {
+namespace NetLib_NETStandart {
     public static class PacketReader
     {
         public static byte[] ReadInt(byte[] data, out int result) 
@@ -36,7 +38,7 @@ namespace NetLib {
             switch (packetType)
             {
                 case PacketType.TestPacket:
-                    TestPacket testPacket = new(Encoding.Unicode.GetString(payloadData))
+                    TestPacket testPacket = new TestPacket(Encoding.Unicode.GetString(payloadData))
                     {
                         PacketID = packetID,
                         PacketType = packetType,
@@ -45,7 +47,7 @@ namespace NetLib {
                     return testPacket;
 
                 case PacketType.ConnectPacket:
-                    ConnectPacket conPacket = new(BitConverter.ToInt32(payloadData)) {
+                    ConnectPacket conPacket = new ConnectPacket(BitConverter.ToInt32(payloadData)) {
                         PacketID = packetID,
                         PacketType = packetType,
                         Sender = sender,
@@ -53,7 +55,7 @@ namespace NetLib {
                     return conPacket;
 
                 case PacketType.ConnectAckPacket:
-                    ConnectAckPacket conAckPacket = new(BitConverter.ToUInt32(payloadData)) {
+                    ConnectAckPacket conAckPacket = new ConnectAckPacket(BitConverter.ToUInt32(payloadData)) {
                         PacketID = packetID,
                         PacketType = packetType,
                         Sender = sender,
@@ -61,7 +63,7 @@ namespace NetLib {
                     return conAckPacket;
                 
                 case PacketType.HeartbeatPacket:
-                    HeartbeatPacket heartbeatPacket = new(new DateTime(BitConverter.ToInt64(payloadData)))
+                    HeartbeatPacket heartbeatPacket = new HeartbeatPacket(new DateTime(BitConverter.ToInt64(payloadData)))
                     {
                         PacketID = packetID,
                         PacketType = packetType,
@@ -70,7 +72,7 @@ namespace NetLib {
                     return heartbeatPacket;
 
                 case PacketType.HeartbeatAckPacket:
-                    HeartbeatAckPacket heartbeatAckPacket = new(new DateTime(BitConverter.ToInt64(payloadData)))
+                    HeartbeatAckPacket heartbeatAckPacket = new HeartbeatAckPacket(new DateTime(BitConverter.ToInt64(payloadData)))
                     {
                         PacketID = packetID,
                         PacketType = packetType,
@@ -79,7 +81,7 @@ namespace NetLib {
                     return heartbeatAckPacket;
 
                 case PacketType.DisconnectPacket:
-                    DisconnectPacket disconnectPacket = new(Encoding.Unicode.GetString(payloadData))
+                    DisconnectPacket disconnectPacket = new DisconnectPacket(Encoding.Unicode.GetString(payloadData))
                     {
                         PacketID = packetID,
                         PacketType = packetType,
@@ -88,7 +90,7 @@ namespace NetLib {
                     return disconnectPacket;
 
                 default:
-                    PartialPacket pp = new(payloadData) {
+                    PartialPacket pp = new PartialPacket(payloadData) {
                         PacketID = packetID,
                         PacketType = packetType,
                         Sender = sender,
@@ -101,7 +103,7 @@ namespace NetLib {
         {
             Console.WriteLine("[PacketReader] reading from stream: ");
 
-            BinaryReader binaryReader = new(stream);
+            BinaryReader binaryReader = new BinaryReader(stream);
             int packetID = binaryReader.ReadInt32();
             Console.WriteLine($" PacketID = {packetID}");
 
@@ -117,7 +119,7 @@ namespace NetLib {
             switch (packetType)
             {
                 case PacketType.TestPacket:
-                    TestPacket testPacket = new(Encoding.Unicode.GetString(binaryReader.ReadBytes(payloadLength))) {
+                    TestPacket testPacket = new TestPacket(Encoding.Unicode.GetString(binaryReader.ReadBytes(payloadLength))) {
                         PacketID = packetID,
                         PacketType = packetType,
                         Sender = sender,
@@ -125,7 +127,7 @@ namespace NetLib {
                     return testPacket;
                 
                 case PacketType.ConnectPacket:
-                    ConnectPacket conPacket = new(binaryReader.ReadInt32()) {
+                    ConnectPacket conPacket = new ConnectPacket(binaryReader.ReadInt32()) {
                         PacketID = packetID,
                         PacketType = packetType,
                         Sender = sender,
@@ -133,7 +135,7 @@ namespace NetLib {
                     return conPacket;
                 
                 case PacketType.ConnectAckPacket:
-                    ConnectAckPacket conAckPacket = new(binaryReader.ReadUInt32()) {
+                    ConnectAckPacket conAckPacket = new ConnectAckPacket(binaryReader.ReadUInt32()) {
                         PacketID = packetID,
                         PacketType = packetType,
                         Sender = sender,
@@ -141,7 +143,7 @@ namespace NetLib {
                     return conAckPacket;
 
                 case PacketType.HeartbeatPacket:
-                    HeartbeatPacket heartbeatPacket = new(new DateTime(binaryReader.ReadInt64()))
+                    HeartbeatPacket heartbeatPacket = new HeartbeatPacket(new DateTime(binaryReader.ReadInt64()))
                     {
                         PacketID = packetID,
                         PacketType = packetType,
@@ -150,7 +152,7 @@ namespace NetLib {
                     return heartbeatPacket;
 
                 case PacketType.HeartbeatAckPacket:
-                    HeartbeatAckPacket heartbeatAckPacket = new(new DateTime(binaryReader.ReadInt64()))
+                    HeartbeatAckPacket heartbeatAckPacket = new HeartbeatAckPacket(new DateTime(binaryReader.ReadInt64()))
                     {
                         PacketID = packetID,
                         PacketType = packetType,
@@ -159,7 +161,7 @@ namespace NetLib {
                     return heartbeatAckPacket;
 
                 case PacketType.DisconnectPacket:
-                    DisconnectPacket disconnectPacket = new(Encoding.Unicode.GetString(binaryReader.ReadBytes(payloadLength)))
+                    DisconnectPacket disconnectPacket = new DisconnectPacket(Encoding.Unicode.GetString(binaryReader.ReadBytes(payloadLength)))
                     {
                         PacketID = packetID,   
                         PacketType = packetType,

@@ -1,12 +1,11 @@
-﻿using NetLib.Packets;
+﻿using NetLib_NETStandart.Packets;
 using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
-using UnityEngine;
-
-namespace NetLib {
+namespace NetLib_NETStandart {
     public class Client
     {
 
@@ -18,7 +17,7 @@ namespace NetLib {
         public Client(IPEndPoint serverEndPoint) 
         {
             this.serverEndPoint = serverEndPoint;
-            connection = new(0);
+            connection = new Connection(0);
 
             _clientRunThread = new Thread(new ThreadStart(_clientRunLoop));
         }

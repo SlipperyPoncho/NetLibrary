@@ -1,14 +1,14 @@
-﻿using NetLib.Packets;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
-using UnityEngine;
+using System.Threading.Tasks;
+using NetLib_NETStandart.Packets;
 
 
-namespace NetLib {
+namespace NetLib_NETStandart {
     namespace Server {
         public struct ClientRepresentation //probably not needed
         {
