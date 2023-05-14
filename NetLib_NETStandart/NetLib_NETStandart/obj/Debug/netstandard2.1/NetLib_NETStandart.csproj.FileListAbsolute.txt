@@ -1,0 +1,10 @@
+D:\ВИТЯ ЛОЛОЛО\4курсЧУМА\Diplo\netlib_main\NetLibrary\NetLib_NETStandart\NetLib_NETStandart\obj\Debug\netstandard2.1\NetLib_NETStandart.csproj.AssemblyReference.cache
+D:\ВИТЯ ЛОЛОЛО\4курсЧУМА\Diplo\netlib_main\NetLibrary\NetLib_NETStandart\NetLib_NETStandart\obj\Debug\netstandard2.1\NetLib_NETStandart.GeneratedMSBuildEditorConfig.editorconfig
+D:\ВИТЯ ЛОЛОЛО\4курсЧУМА\Diplo\netlib_main\NetLibrary\NetLib_NETStandart\NetLib_NETStandart\obj\Debug\netstandard2.1\NetLib_NETStandart.AssemblyInfoInputs.cache
+D:\ВИТЯ ЛОЛОЛО\4курсЧУМА\Diplo\netlib_main\NetLibrary\NetLib_NETStandart\NetLib_NETStandart\obj\Debug\netstandard2.1\NetLib_NETStandart.AssemblyInfo.cs
+D:\ВИТЯ ЛОЛОЛО\4курсЧУМА\Diplo\netlib_main\NetLibrary\NetLib_NETStandart\NetLib_NETStandart\obj\Debug\netstandard2.1\NetLib_NETStandart.csproj.CoreCompileInputs.cache
+D:\ВИТЯ ЛОЛОЛО\4курсЧУМА\Diplo\netlib_main\NetLibrary\NetLib_NETStandart\NetLib_NETStandart\bin\Debug\netstandard2.1\NetLib_NETStandart.deps.json
+D:\ВИТЯ ЛОЛОЛО\4курсЧУМА\Diplo\netlib_main\NetLibrary\NetLib_NETStandart\NetLib_NETStandart\bin\Debug\netstandard2.1\NetLib_NETStandart.dll
+D:\ВИТЯ ЛОЛОЛО\4курсЧУМА\Diplo\netlib_main\NetLibrary\NetLib_NETStandart\NetLib_NETStandart\bin\Debug\netstandard2.1\NetLib_NETStandart.pdb
+D:\ВИТЯ ЛОЛОЛО\4курсЧУМА\Diplo\netlib_main\NetLibrary\NetLib_NETStandart\NetLib_NETStandart\obj\Debug\netstandard2.1\NetLib_NETStandart.dll
+D:\ВИТЯ ЛОЛОЛО\4курсЧУМА\Diplo\netlib_main\NetLibrary\NetLib_NETStandart\NetLib_NETStandart\obj\Debug\netstandard2.1\NetLib_NETStandart.pdb
