@@ -4,6 +4,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
+using UnityEngine;
+
 namespace NetLib {
     public class Client
     {
