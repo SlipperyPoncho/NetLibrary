@@ -11,6 +11,19 @@
         "runtime": {
           "bin/placeholder/NetLib_NETStandart.dll": {}
         }
+      },
+      "TestCommons/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v6.0",
+        "dependencies": {
+          "NetLib_NETStandart": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/TestCommons.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/TestCommons.dll": {}
+        }
       }
     }
   },
@@ -19,11 +32,17 @@
       "type": "project",
       "path": "../NetLib_NETStandart/NetLib_NETStandart.csproj",
       "msbuildProject": "../NetLib_NETStandart/NetLib_NETStandart.csproj"
+    },
+    "TestCommons/1.0.0": {
+      "type": "project",
+      "path": "../TestCommons/TestCommons.csproj",
+      "msbuildProject": "../TestCommons/TestCommons.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net6.0": [
-      "NetLib_NETStandart >= 1.0.0"
+      "NetLib_NETStandart >= 1.0.0",
+      "TestCommons >= 1.0.0"
     ]
   },
   "packageFolders": {
@@ -59,6 +78,9 @@
           "projectReferences": {
             "D:\\ВИТЯ ЛОЛОЛО\\4курсЧУМА\\Diplo\\netlib_main\\NetLibrary\\NetLib_NETStandart\\NetLib_NETStandart\\NetLib_NETStandart.csproj": {
               "projectPath": "D:\\ВИТЯ ЛОЛОЛО\\4курсЧУМА\\Diplo\\netlib_main\\NetLibrary\\NetLib_NETStandart\\NetLib_NETStandart\\NetLib_NETStandart.csproj"
+            },
+            "D:\\ВИТЯ ЛОЛОЛО\\4курсЧУМА\\Diplo\\netlib_main\\NetLibrary\\NetLib_NETStandart\\TestCommons\\TestCommons.csproj": {
+              "projectPath": "D:\\ВИТЯ ЛОЛОЛО\\4курсЧУМА\\Diplo\\netlib_main\\NetLibrary\\NetLib_NETStandart\\TestCommons\\TestCommons.csproj"
             }
           }
         }

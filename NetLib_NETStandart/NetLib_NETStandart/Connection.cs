@@ -12,6 +12,11 @@ using System.Threading.Tasks;
 //TODO: fix all nullable underlines cause they piss me off
 // properly handle disconnections (that would probably work through some sort of disconnectpacket + heartbeats
 namespace NetLib_NETStandart {
+
+    public class ConnectionEventArgs : EventArgs {
+        public uint new_client_id { get; set; }
+    }
+
     public class ClientInfo {
         public TcpClient? clientTCP;
         public IPEndPoint? clientUDPEndPoint;
@@ -31,7 +36,7 @@ namespace NetLib_NETStandart {
         private ConcurrentQueue<NetMessage> q_incomingMessages = new ConcurrentQueue<NetMessage>();
         //public ConcurrentDictionary<IPEndPoint, ClientInfo> activeClients = new();
         public ConcurrentDictionary<uint, ClientInfo> activeClients = new ConcurrentDictionary<uint, ClientInfo>();
-        private uint max_connections = 3;
+        private uint max_connections = 100;
         private Queue<uint> availableIds;
 
         private uint connection_key = 0;
@@ -49,11 +54,11 @@ namespace NetLib_NETStandart {
         private bool _connectionRunning = false;
         private int port;
 
-
+        public event EventHandler<ConnectionEventArgs> onNewConnection;
         public Connection(int port = 0) {
             this.port = port;
 
-            tcpListener = new TcpListener(IPAddress.Loopback, port);
+            tcpListener = new TcpListener(IPAddress.Any, port);
             //if (port != 0) port+=2;
             udpListener = new UdpClient(port);
 
@@ -172,6 +177,8 @@ namespace NetLib_NETStandart {
                     ConnectAckPacket cap = new ConnectAckPacket(sender);
                     SendTCP(sender, cap);
 
+                    onNewConnection?.Invoke(this, new ConnectionEventArgs { new_client_id = sender });
+
                     return true;
 
                 case PacketType.ConnectAckPacket:
@@ -242,7 +249,7 @@ namespace NetLib_NETStandart {
         }
 
 
-        private void _networkUdpReceive() { //TODO: internal messages
+        private void _networkUdpReceive() { 
             if (!_connectionRunning) return;
         
             IPEndPoint connection = new IPEndPoint(IPAddress.Any, 0);

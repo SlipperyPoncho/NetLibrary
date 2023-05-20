@@ -38,6 +38,9 @@ namespace NetLib_NETStandart {
             data = BitConverter.GetBytes(Sender);
             stream.Write(data, 0, data.Length);
 
+            data = BitConverter.GetBytes(payload.Length);
+            stream.Write(data, 0, data.Length);
+
             stream.Write(payload, 0, payload.Length);
 
             return stream.ToArray();

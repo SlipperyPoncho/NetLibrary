@@ -16,3 +16,5 @@ D:\ВИТЯ ЛОЛОЛО\4курсЧУМА\Diplo\netlib_main\NetLibrary\NetLib_N
 D:\ВИТЯ ЛОЛОЛО\4курсЧУМА\Diplo\netlib_main\NetLibrary\NetLib_NETStandart\TestServer\obj\Debug\net6.0\TestServer.pdb
 D:\ВИТЯ ЛОЛОЛО\4курсЧУМА\Diplo\netlib_main\NetLibrary\NetLib_NETStandart\TestServer\obj\Debug\net6.0\TestServer.genruntimeconfig.cache
 D:\ВИТЯ ЛОЛОЛО\4курсЧУМА\Diplo\netlib_main\NetLibrary\NetLib_NETStandart\TestServer\obj\Debug\net6.0\ref\TestServer.dll
+D:\ВИТЯ ЛОЛОЛО\4курсЧУМА\Diplo\netlib_main\NetLibrary\NetLib_NETStandart\TestServer\bin\Debug\net6.0\TestCommons.dll
+D:\ВИТЯ ЛОЛОЛО\4курсЧУМА\Diplo\netlib_main\NetLibrary\NetLib_NETStandart\TestServer\bin\Debug\net6.0\TestCommons.pdb
