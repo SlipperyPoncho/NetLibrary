@@ -1,5 +1,6 @@
 ﻿using NetLib_NETStandart.Packets;
 using System;
+using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -11,8 +12,10 @@ namespace NetLib_NETStandart {
 
         private bool _clientRunning = false;
         private Thread _clientRunThread;
-        private Connection connection;
+        public Connection connection;
         private IPEndPoint serverEndPoint;
+
+        public ConcurrentQueue<NetMessage> q_incomingMessages = new ConcurrentQueue<NetMessage>();
 
         public Client(IPEndPoint serverEndPoint) 
         {
@@ -61,6 +64,9 @@ namespace NetLib_NETStandart {
                             case PacketType.TestPacket:
                                 TestPacket tp = (TestPacket)msg.packet;
                                 Console.WriteLine($"[Client] Received TestPacket: \"{tp.Text}\"");
+                                break;
+                            default:
+                                q_incomingMessages.Enqueue(msg);
                                 break;
                         }
 

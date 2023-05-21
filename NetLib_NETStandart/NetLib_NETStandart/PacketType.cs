@@ -9,5 +9,6 @@ namespace NetLib_NETStandart {
         HeartbeatPacket,
         HeartbeatAckPacket,
         DisconnectPacket,
+        CustomPacket,
     }
 }

@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NetLib_NETStandart\NetLib_NETStandart.csproj" />
+    <ProjectReference Include="..\TestCommons\TestCommons.csproj" />
   </ItemGroup>
 
 </Project>

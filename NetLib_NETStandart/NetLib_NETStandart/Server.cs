@@ -7,26 +7,29 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NetLib_NETStandart.Packets;
 
-
+// GET incoming partial packets
 namespace NetLib_NETStandart {
     namespace Server {
-        public struct ClientRepresentation //probably not needed
-        {
-            public IPEndPoint address;
-
+        public class ServerEventArgs : EventArgs {
+            public uint new_client_id { get; set; }
         }
-
         public class Server
         {
             //private Thread _serverRunThread;
             private Task t_serverRunTask;
             public bool Running { get => _serverRunning; }
             private bool _serverRunning = false;
-            private Connection connection;
+            public Connection connection;
+
+            public ConcurrentQueue<NetMessage> q_incomingMessages = new ConcurrentQueue<NetMessage>();
+
+            public event EventHandler<ServerEventArgs> onNewConnection;
+
             public Server(int port) 
             { 
                 connection = new Connection(port);
                 connection.SetConnectionKey(1);
+                connection.onNewConnection += NewClientConnected;
                 t_serverRunTask = new Task(_serverRunLoop);
             }
 
@@ -55,6 +58,10 @@ namespace NetLib_NETStandart {
             {
 
             }
+            
+            public void NewClientConnected(object sender, ConnectionEventArgs args) {
+                onNewConnection?.Invoke(this, new ServerEventArgs { new_client_id = args.new_client_id });
+            }
 
             //------------------------separate task
             private void _serverRunLoop() {
@@ -71,6 +78,10 @@ namespace NetLib_NETStandart {
                                     TestPacket tp = (TestPacket)msg.packet;
                                     Console.WriteLine($"[Server] Received TestPacket: \"{tp.Text}\"");
                                     break;
+                                default:
+                                    q_incomingMessages.Enqueue(msg);
+                                    break;
+
                             }
 
                         }

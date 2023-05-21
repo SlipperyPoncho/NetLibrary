@@ -7,17 +7,33 @@ using System.Text;
 namespace NetLib_NETStandart {
     public static class PacketReader
     {
-        public static byte[] ReadInt(byte[] data, out int result) 
+        public static int ReadInt(ref byte[] data, int index, out int result) 
         {
-            byte[] payload = new byte[data.Length - sizeof(int)];
-            Array.Copy(data, sizeof(int), payload, 0, payload.Length);
-            result = BitConverter.ToInt32(data, 0);
-            return payload;
+            result = BitConverter.ToInt32(data, index);
+            return index + sizeof(int);
+        }
+
+        public static int ReadFloat(ref byte[] data, int index, out float result) {
+            result = BitConverter.ToSingle(data, index);
+            return index + sizeof(float);
+        }
+
+        public static int ReadBool(ref byte[] data, int index, out bool result) {
+            result = BitConverter.ToBoolean(data, index);
+            return index + sizeof(bool);
+        }
+
+        public static int ReadUint(ref byte[] data, int index, out uint result) {
+            result = BitConverter.ToUInt32(data, index);
+            return index + sizeof(uint);
         }
 
         public static Packet? ReadFromRaw(byte[] data)
         {
             Console.WriteLine("[PacketReader] reading from raw: ");
+            var watch = new System.Diagnostics.Stopwatch();
+            watch.Start();
+
 
             int packetID = BitConverter.ToInt32(data, 0);
             Console.WriteLine($" PacketID = {packetID}");
@@ -34,7 +50,9 @@ namespace NetLib_NETStandart {
             byte[] payloadData = new byte[payloadLength];
 
             Array.Copy(data, sizeof(int) * 4, payloadData, 0, payloadLength);
-            
+
+            watch.Stop();
+            Console.WriteLine($"[PACKETREADER]Execution Time: {watch.ElapsedTicks}");
             switch (packetType)
             {
                 case PacketType.TestPacket:
@@ -43,6 +61,7 @@ namespace NetLib_NETStandart {
                         PacketID = packetID,
                         PacketType = packetType,
                         Sender = sender,
+                        
                     };
                     return testPacket;
 
