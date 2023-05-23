@@ -3,18 +3,23 @@ using System.Collections.Generic;
 using System.IO;
 
 namespace NetLib_NETStandart.Packets {
-    public class HeartbeatPacket : Packet {
-        private DateTime timeStamp;
-        public DateTime TimeStamp { get => timeStamp; set => timeStamp = value; }
+    public struct HeartbeatStatus {
+        public float rtt;
+        public bool packetloss;
+    }
 
-        public HeartbeatPacket(DateTime stamp) {
+    public class HeartbeatPacket : Packet {
+        private long timeStamp;
+        public long TimeStamp { get => timeStamp; set => timeStamp = value; }
+
+        public HeartbeatPacket(long stamp) {
             header.packetType = PacketType.HeartbeatPacket;
             timeStamp = stamp;
         }
 
         public override byte[] GetRaw() {
             MemoryStream payloadstream = new MemoryStream();
-            PacketBuilder.WriteLong(ref payloadstream, timeStamp.Ticks);
+            PacketBuilder.WriteLong(ref payloadstream, TimeStamp);
             header.payloadLength = (int)payloadstream.Length;
 
             MemoryStream stream = new MemoryStream();

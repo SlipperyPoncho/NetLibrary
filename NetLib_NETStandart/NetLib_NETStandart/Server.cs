@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -11,25 +12,28 @@ using NetLib_NETStandart.Packets;
 namespace NetLib_NETStandart {
     namespace Server {
         public class ServerEventArgs : EventArgs {
-            public uint new_client_id { get; set; }
+            public uint client_id { get; set; }
         }
+
         public class Server
         {
-            //private Thread _serverRunThread;
             private Task t_serverRunTask;
             public bool Running { get => _serverRunning; }
             private bool _serverRunning = false;
             public Connection connection;
 
-            public ConcurrentQueue<NetMessage> q_incomingMessages = new ConcurrentQueue<NetMessage>();
+            public ConcurrentQueue<NetMessage> q_incomingMessages = new ConcurrentQueue<NetMessage>();            
 
-            public event EventHandler<ServerEventArgs> onNewConnection;
+            public event EventHandler<ServerEventArgs>? onNewConnection;
+            public event EventHandler<ServerEventArgs>? onClientDisconnect;
+            public event EventHandler<ServerEventArgs>? onHeartbeat;
 
             public Server(int port) 
             { 
                 connection = new Connection(port);
                 connection.SetConnectionKey(1);
                 connection.onNewConnection += NewClientConnected;
+                connection.onHeartbeat += OnHeartbeat;
                 t_serverRunTask = new Task(_serverRunLoop);
             }
 
@@ -48,7 +52,7 @@ namespace NetLib_NETStandart {
                 connection.SendToAll(new TestPacket(msg));
             }
 
-            public void SendHeartbeat_All(DateTime time)
+            public void SendHeartbeat_All(long time)
             {
                 Console.WriteLine("[Server] start send all...");
                 connection.SendToAll(new HeartbeatPacket(time));
@@ -58,13 +62,21 @@ namespace NetLib_NETStandart {
             {
 
             }
-            
+
+            public void OnHeartbeat(object sender, ConnectionEventArgs args) {
+                onHeartbeat?.Invoke(this, new ServerEventArgs());
+            }
+
             public void NewClientConnected(object sender, ConnectionEventArgs args) {
-                onNewConnection?.Invoke(this, new ServerEventArgs { new_client_id = args.new_client_id });
+                onNewConnection?.Invoke(this, new ServerEventArgs { client_id = args.client_id });
+            }
+
+            public void ClientDisconnected(object sender, ConnectionEventArgs args) {
+                onClientDisconnect?.Invoke(this, new ServerEventArgs { client_id = args.client_id });
             }
 
             //------------------------separate task
-            private void _serverRunLoop() {
+            private async void _serverRunLoop() {
                 if (!_serverRunning) return;
 
                 while (_serverRunning) {
@@ -87,7 +99,7 @@ namespace NetLib_NETStandart {
                         }
                     }
                     else {
-                        Task.Delay(1); //sleepy time
+                        await Task.Delay(1); //sleepy time
                     }
                 }
 

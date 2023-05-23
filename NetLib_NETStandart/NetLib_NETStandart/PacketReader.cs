@@ -48,18 +48,18 @@ namespace NetLib_NETStandart {
         public static Packet? ReadFromRaw(byte[] data)
         {
             data = Utils.Decompress(data);
-            Console.WriteLine("[PacketReader] reading from raw: ");
+            //Console.WriteLine("[PacketReader] reading from raw: ");
 
             int index = 0;
             index = ReadInt(ref data, index, out int i_packet_Type);
             PacketType packetType = (PacketType)i_packet_Type;
-            Console.WriteLine($" PacketType = {packetType}");
+            //Console.WriteLine($" PacketType = {packetType}");
 
             index = ReadUint(ref data, index, out uint sender);
-            Console.WriteLine($" Sender = {sender}");
+            //Console.WriteLine($" Sender = {sender}");
 
             index = ReadInt(ref data, index, out int payloadLength);
-            Console.WriteLine($" Payload length = {payloadLength}\n");
+            //Console.WriteLine($" Payload length = {payloadLength}\n");
 
             switch (packetType)
             {
@@ -83,13 +83,13 @@ namespace NetLib_NETStandart {
                 
                 case PacketType.HeartbeatPacket:
                     ReadLong(ref data, index, out long hp_stamp);
-                    HeartbeatPacket heartbeatPacket = new HeartbeatPacket(new DateTime(hp_stamp));
+                    HeartbeatPacket heartbeatPacket = new HeartbeatPacket(hp_stamp);
                     heartbeatPacket.header.sender = sender;
                     return heartbeatPacket;
 
                 case PacketType.HeartbeatAckPacket:
                     ReadLong(ref data, index, out long hap_stamp);
-                    HeartbeatAckPacket heartbeatAckPacket = new HeartbeatAckPacket(new DateTime(hap_stamp));
+                    HeartbeatAckPacket heartbeatAckPacket = new HeartbeatAckPacket(hap_stamp);
                     heartbeatAckPacket.header.sender = sender;
                     return heartbeatAckPacket;
 
@@ -110,7 +110,7 @@ namespace NetLib_NETStandart {
 
         public static Packet? ReadFromStream(NetworkStream stream)
         {
-            Console.WriteLine("[PacketReader] reading from stream: ");
+            //Console.WriteLine("[PacketReader] reading from stream: ");
 
             byte[] packet_data;
             byte[] read_data = new byte[1024];
@@ -124,14 +124,14 @@ namespace NetLib_NETStandart {
             }
             packet_data = Utils.Decompress(packet_data);
             int index = 0;
-            Console.WriteLine($" Packet size = {packet_data.Length}");
+            //Console.WriteLine($" Packet size = {packet_data.Length}");
             index = ReadInt(ref packet_data, index, out int i_packetType);
             PacketType packetType = (PacketType)i_packetType;
-            Console.WriteLine($" PacketType = {packetType}");
+            //Console.WriteLine($" PacketType = {packetType}");
             index = ReadUint(ref packet_data, index, out uint sender);
-            Console.WriteLine($" Sender = {sender}");
+            //Console.WriteLine($" Sender = {sender}");
             index = ReadInt(ref packet_data, index, out int payloadLength);
-            Console.WriteLine($" Payload length = {payloadLength}\n");
+            //Console.WriteLine($" Payload length = {payloadLength}\n");
 
 
 
@@ -157,13 +157,13 @@ namespace NetLib_NETStandart {
 
                 case PacketType.HeartbeatPacket:
                     ReadLong(ref packet_data, index, out long hp_stamp);
-                    HeartbeatPacket heartbeatPacket = new HeartbeatPacket(new DateTime(hp_stamp));
+                    HeartbeatPacket heartbeatPacket = new HeartbeatPacket(hp_stamp);
                     heartbeatPacket.header.sender = sender;
                     return heartbeatPacket;
 
                 case PacketType.HeartbeatAckPacket:
                     ReadLong(ref packet_data, index, out long hap_stamp);
-                    HeartbeatAckPacket heartbeatAckPacket = new HeartbeatAckPacket(new DateTime(hap_stamp));
+                    HeartbeatAckPacket heartbeatAckPacket = new HeartbeatAckPacket(hap_stamp);
                     heartbeatAckPacket.header.sender = sender;
                     return heartbeatAckPacket;
 

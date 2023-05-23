@@ -6,10 +6,10 @@ namespace NetLib_NETStandart.Packets
 {
     public class HeartbeatAckPacket : Packet
     {
-        private DateTime timeStamp;
-        public DateTime TimeStamp { get => timeStamp; set => timeStamp = value; }
+        private long timeStamp;
+        public long TimeStamp { get => timeStamp; set => timeStamp = value; }
 
-        public HeartbeatAckPacket(DateTime stamp)
+        public HeartbeatAckPacket(long stamp)
         {
             header.packetType = PacketType.HeartbeatAckPacket;
             timeStamp = stamp;
@@ -18,7 +18,7 @@ namespace NetLib_NETStandart.Packets
         public override byte[] GetRaw()
         {
             MemoryStream payloadstream = new MemoryStream();
-            PacketBuilder.WriteLong(ref payloadstream, timeStamp.Ticks);
+            PacketBuilder.WriteLong(ref payloadstream, timeStamp);
             header.payloadLength = (int)payloadstream.Length;
 
             MemoryStream stream = new MemoryStream();
