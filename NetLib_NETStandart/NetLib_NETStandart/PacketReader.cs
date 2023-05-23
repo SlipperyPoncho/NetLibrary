@@ -47,59 +47,61 @@ namespace NetLib_NETStandart {
 
         public static Packet? ReadFromRaw(byte[] data)
         {
+            data = Utils.Decompress(data);
             Console.WriteLine("[PacketReader] reading from raw: ");
-            var watch = new System.Diagnostics.Stopwatch();
-            watch.Start();
 
-            PacketType packetType = (PacketType)BitConverter.ToInt32(data, 0);
+            int index = 0;
+            index = ReadInt(ref data, index, out int i_packet_Type);
+            PacketType packetType = (PacketType)i_packet_Type;
             Console.WriteLine($" PacketType = {packetType}");
 
-            uint sender = BitConverter.ToUInt32(data, sizeof(int));
+            index = ReadUint(ref data, index, out uint sender);
             Console.WriteLine($" Sender = {sender}");
 
-            int payloadLength = BitConverter.ToInt32(data, sizeof(int) * 2);
+            index = ReadInt(ref data, index, out int payloadLength);
             Console.WriteLine($" Payload length = {payloadLength}\n");
 
-            byte[] payloadData = new byte[payloadLength];
-
-            Array.Copy(data, sizeof(int) * 3, payloadData, 0, payloadLength);
-
-            watch.Stop();
-            Console.WriteLine($"[PACKETREADER]Execution Time: {watch.ElapsedTicks}");
             switch (packetType)
             {
                 case PacketType.TestPacket:
-                    TestPacket testPacket = new TestPacket(Encoding.Unicode.GetString(payloadData));
+                    ReadString(ref data, index, out string tp_msg);
+                    TestPacket testPacket = new TestPacket(tp_msg);
                     testPacket.header.sender = sender;
                     return testPacket;
 
                 case PacketType.ConnectPacket:
-                    ConnectPacket conPacket = new ConnectPacket(BitConverter.ToInt32(payloadData));
+                    ReadInt(ref data, index, out int cp_port);
+                    ConnectPacket conPacket = new ConnectPacket(cp_port);
                     conPacket.header.sender = sender;
                     return conPacket;
 
                 case PacketType.ConnectAckPacket:
-                    ConnectAckPacket conAckPacket = new ConnectAckPacket(BitConverter.ToUInt32(payloadData));
+                    ReadUint(ref data, index, out uint cap_key);
+                    ConnectAckPacket conAckPacket = new ConnectAckPacket(cap_key);
                     conAckPacket.header.sender = sender;
                     return conAckPacket;
                 
                 case PacketType.HeartbeatPacket:
-                    HeartbeatPacket heartbeatPacket = new HeartbeatPacket(new DateTime(BitConverter.ToInt64(payloadData)));
+                    ReadLong(ref data, index, out long hp_stamp);
+                    HeartbeatPacket heartbeatPacket = new HeartbeatPacket(new DateTime(hp_stamp));
                     heartbeatPacket.header.sender = sender;
                     return heartbeatPacket;
 
                 case PacketType.HeartbeatAckPacket:
-                    HeartbeatAckPacket heartbeatAckPacket = new HeartbeatAckPacket(new DateTime(BitConverter.ToInt64(payloadData)));
+                    ReadLong(ref data, index, out long hap_stamp);
+                    HeartbeatAckPacket heartbeatAckPacket = new HeartbeatAckPacket(new DateTime(hap_stamp));
                     heartbeatAckPacket.header.sender = sender;
                     return heartbeatAckPacket;
 
                 case PacketType.DisconnectPacket:
-                    DisconnectPacket disconnectPacket = new DisconnectPacket(Encoding.Unicode.GetString(payloadData));
+                    ReadString(ref data, index, out string dp_msg);
+                    DisconnectPacket disconnectPacket = new DisconnectPacket(dp_msg);
                     disconnectPacket.header.sender = sender;
                     return disconnectPacket;
 
                 default:
-                    PartialPacket pp = new PartialPacket(payloadData);
+                    ReadBytes(ref data, index, payloadLength, out byte[] pp_data);
+                    PartialPacket pp = new PartialPacket(pp_data);
                     pp.header.packetType = packetType;
                     pp.header.sender = sender;
                     return pp;
@@ -120,6 +122,7 @@ namespace NetLib_NETStandart {
                 }
                 packet_data = ms.ToArray();
             }
+            packet_data = Utils.Decompress(packet_data);
             int index = 0;
             Console.WriteLine($" Packet size = {packet_data.Length}");
             index = ReadInt(ref packet_data, index, out int i_packetType);

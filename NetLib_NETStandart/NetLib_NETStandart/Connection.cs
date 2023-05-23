@@ -129,9 +129,9 @@ namespace NetLib_NETStandart {
         }
 
         public void SendTCP(uint receiver, Packet packet) { // i have no idea with this networkstream ting if i should read first to clear the stream... probably a TODO thing
-            Console.WriteLine($"[TCP] Sending message to {receiver}");
             packet.header.sender = connection_key;
-            byte[] data = packet.GetRaw();
+            byte[] data = Utils.Compress(packet.GetRaw());
+            Console.WriteLine($"[TCP] Sending message to {receiver}; of size {data.Length}");
 
             if (!activeClients.TryGetValue(receiver, out ClientInfo? client)) return; //get client
             if (client == null) return;
@@ -142,9 +142,9 @@ namespace NetLib_NETStandart {
 
         public void SendUDP(uint receiver, Packet packet) {
             packet.header.sender = connection_key;
-            byte[] data = packet.GetRaw();
+            byte[] data = Utils.Compress(packet.GetRaw());
+            Console.WriteLine($"[UDP] Sending message to {receiver}; of size {data.Length}");
             activeClients.TryGetValue(receiver, out ClientInfo client);
-            Console.WriteLine($"[UDP] Sending message to {receiver}");
             udpListener.Send(data, data.Length, client.clientUDPEndPoint);
         }
 
