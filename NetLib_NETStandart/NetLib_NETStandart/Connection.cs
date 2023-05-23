@@ -130,7 +130,7 @@ namespace NetLib_NETStandart {
 
         public void SendTCP(uint receiver, Packet packet) { // i have no idea with this networkstream ting if i should read first to clear the stream... probably a TODO thing
             Console.WriteLine($"[TCP] Sending message to {receiver}");
-            packet.Sender = connection_key;
+            packet.header.sender = connection_key;
             byte[] data = packet.GetRaw();
 
             if (!activeClients.TryGetValue(receiver, out ClientInfo? client)) return; //get client
@@ -141,7 +141,7 @@ namespace NetLib_NETStandart {
         }
 
         public void SendUDP(uint receiver, Packet packet) {
-            packet.Sender = connection_key;
+            packet.header.sender = connection_key;
             byte[] data = packet.GetRaw();
             activeClients.TryGetValue(receiver, out ClientInfo client);
             Console.WriteLine($"[UDP] Sending message to {receiver}");
@@ -165,7 +165,7 @@ namespace NetLib_NETStandart {
 
 
         private bool handle_internal_packets(uint sender, Packet packet) {
-            switch (packet.PacketType) {
+            switch (packet.header.packetType) {
                 case PacketType.ConnectPacket:
                     Console.WriteLine("[Connection] Got connectpacket, bruh");
                     if (!activeClients.TryGetValue(sender, out ClientInfo? client)) return true; // what
@@ -195,7 +195,10 @@ namespace NetLib_NETStandart {
 
                 case PacketType.HeartbeatAckPacket:
                     HeartbeatAckPacket hap_recv = (HeartbeatAckPacket)packet;
-                    Console.WriteLine($"[Connection] heartbeat: {(DateTime.Now - hap_recv.TimeStamp).Milliseconds}ms");
+                    float newrtt = (DateTime.Now - hap_recv.TimeStamp).Milliseconds;
+                    activeClients.TryGetValue(hap_recv.header.sender, out client);
+                    client.rtt = newrtt;
+                    Console.WriteLine($"[Connection] heartbeat: {newrtt}ms");
                     return true;
 
                 case PacketType.DisconnectPacket:
@@ -235,7 +238,7 @@ namespace NetLib_NETStandart {
                         while (stream.DataAvailable) {
                             Console.WriteLine($"[TCP] Received message from {client.Key}, reading...");
                             Packet? packet = PacketReader.ReadFromStream(stream);
-                            Console.WriteLine($"{packet!.PacketType}");
+                            Console.WriteLine($"{packet!.header.packetType}");
                             if(packet != null) 
                                 if(!handle_internal_packets(client.Key, packet))
                                     q_incomingMessages.Enqueue(new NetMessage { packet = packet, RecieveTime = DateTime.Now });
@@ -258,7 +261,7 @@ namespace NetLib_NETStandart {
                 if(udpListener.Available > 0) { //UDP Listen
                     byte[] data = udpListener.Receive(ref connection);
                     Packet? packet = PacketReader.ReadFromRaw(data);
-                    uint sender = packet.Sender;
+                    uint sender = packet.header.sender;
                     Console.WriteLine($"[UDP] Received message from {sender}, reading...");
                     if (packet != null)
                         if (!handle_internal_packets(sender, packet))

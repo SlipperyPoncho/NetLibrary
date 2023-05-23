@@ -1,11 +1,14 @@
 ﻿using NetLib_NETStandart;
 
 namespace TestCommons {
+
+    [Serializable]
     public enum customPacketType {
         PlayerInput,
         PlayerPosition,
     }
 
+    [Serializable]
     public struct PlayerInput {
         public bool W;
         public bool A;
@@ -13,6 +16,7 @@ namespace TestCommons {
         public bool D;
     }
 
+    [Serializable]
     public struct PlayerPosition {
         public uint client_id;
         public float X;
@@ -24,8 +28,8 @@ namespace TestCommons {
         customPacketType c_packetType = customPacketType.PlayerInput;
         PlayerInput inputs;
         public PlayerInputPacket(PlayerInput inputs) {
+            header.packetType = NetLib_NETStandart.PacketType.CustomPacket;
             this.inputs = inputs;
-            PacketType = NetLib_NETStandart.PacketType.CustomPacket;
         }
 
         public static PlayerInput read(byte[] payload) {
@@ -39,34 +43,18 @@ namespace TestCommons {
         }
 
         public override byte[] GetRaw() {
+            MemoryStream payloadstream = new MemoryStream();
+            PacketBuilder.WriteInt(ref payloadstream, (int)c_packetType);
+            PacketBuilder.WriteBool(ref payloadstream, inputs.W);
+            PacketBuilder.WriteBool(ref payloadstream, inputs.A);
+            PacketBuilder.WriteBool(ref payloadstream, inputs.S);
+            PacketBuilder.WriteBool(ref payloadstream, inputs.D);
+            header.payloadLength = (int)payloadstream.Length;
+
             MemoryStream stream = new MemoryStream();
+            PacketBuilder.WriteHeader(ref stream, header);
+            payloadstream.WriteTo(stream);
 
-            byte[] data = BitConverter.GetBytes(PacketID);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes((int)PacketType);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes(Sender);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes(sizeof(bool) * 4 + sizeof(int));
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes((int)c_packetType);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes(inputs.W);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes(inputs.A);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes(inputs.S);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes(inputs.D);
-            stream.Write(data, 0, data.Length);
 
             return stream.ToArray();
         }
@@ -76,8 +64,8 @@ namespace TestCommons {
         customPacketType c_packetType = customPacketType.PlayerPosition;
         PlayerPosition input;
         public PlayerPositionPacket(PlayerPosition input) {
+            header.packetType = NetLib_NETStandart.PacketType.CustomPacket;
             this.input = input;
-            PacketType = NetLib_NETStandart.PacketType.CustomPacket;
         }
 
         public static PlayerPosition read(byte[] payload) {
@@ -91,35 +79,17 @@ namespace TestCommons {
         }
 
         public override byte[] GetRaw() {
+            MemoryStream payloadstream = new MemoryStream();
+            PacketBuilder.WriteInt(ref payloadstream, (int)c_packetType);
+            PacketBuilder.WriteUint(ref payloadstream, input.client_id);
+            PacketBuilder.WriteFloat(ref payloadstream, input.X);
+            PacketBuilder.WriteFloat(ref payloadstream, input.Y);
+            PacketBuilder.WriteFloat(ref payloadstream, input.rotation);
+            header.payloadLength = (int)payloadstream.Length;
+
             MemoryStream stream = new MemoryStream();
-
-            byte[] data = BitConverter.GetBytes(PacketID);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes((int)PacketType);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes(Sender);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes(sizeof(int) + sizeof(uint) + sizeof(float) * 3);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes((int)c_packetType);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes(input.client_id);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes(input.X);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes(input.Y);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes(input.rotation);
-            stream.Write(data, 0, data.Length);
-
+            PacketBuilder.WriteHeader(ref stream, header);
+            payloadstream.WriteTo(stream);
 
             return stream.ToArray();
         }

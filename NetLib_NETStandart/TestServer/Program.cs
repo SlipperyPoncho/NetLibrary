@@ -21,12 +21,12 @@ class TestServer {
                     case (int)customPacketType.PlayerInput:
                         PlayerInput inputs = PlayerInputPacket.read(payload);
                         Console.WriteLine(inputs.W + " " + inputs.A + " " + inputs.S + " " + inputs.D + " ");
-                        server.connection.SendTCP(packet.Sender, new PlayerInputPacket(inputs));
+                        server.connection.SendUDP(packet.header.sender, new PlayerInputPacket(inputs));
                         break;
                     case (int)customPacketType.PlayerPosition:
                         PlayerPosition pos = PlayerPositionPacket.read(payload);
                         Console.WriteLine(pos.client_id + " " + pos.X + " " + pos.Y + " " + pos.rotation);
-                        server.connection.SendTCP(packet.Sender, new PlayerPositionPacket(pos));
+                        server.connection.SendUDP(packet.header.sender, new PlayerPositionPacket(pos));
                         break;
                     default:
                         Console.WriteLine("POOP POOP");

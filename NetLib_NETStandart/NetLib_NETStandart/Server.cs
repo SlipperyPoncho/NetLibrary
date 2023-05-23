@@ -73,7 +73,7 @@ namespace NetLib_NETStandart {
                         while (connection.Available()) {
                             NetMessage msg = connection.GetMessage();
 
-                            switch (msg.packet.PacketType) {
+                            switch (msg.packet.header.packetType) {
                                 case PacketType.TestPacket:
                                     TestPacket tp = (TestPacket)msg.packet;
                                     Console.WriteLine($"[Server] Received TestPacket: \"{tp.Text}\"");
