@@ -17,32 +17,28 @@ namespace NetLib_NETStandart {
 
     public class ConnectionEventArgs : EventArgs {
         public uint client_id { get; set; }
+        public Dictionary<uint, float>? heartbeatInfo { get; set; }
     }
-
-
 
     public struct NetMessage {
         public Packet packet { get; set; }
         public DateTime RecieveTime { get; set; }
     }
+    public class ClientInfo {
+        internal TcpClient? clientTCP;
+        internal IPEndPoint? clientUDPEndPoint;
+        internal long lastSeq = 0;
+        internal long seq = 0;
+        
+        internal bool isAlive = true;
+
+        float rtt = 0;
+        public float RTT {  get => rtt;  internal set => rtt = value; }
+    }
 
     public class Connection
     {
-        public class ClientInfo {
-            internal TcpClient? clientTCP;
-            internal IPEndPoint? clientUDPEndPoint;
-            internal long lastSeq = 0;
-            internal long seq = 0;
-            
-            internal bool isAlive = true;
-
-            float rtt = 0;
-            public float RTT {  get => rtt;  internal set => rtt = value; }
-        }
-
-
         private ConcurrentQueue<NetMessage> q_incomingMessages = new ConcurrentQueue<NetMessage>();
-        //public ConcurrentDictionary<IPEndPoint, ClientInfo> activeClients = new();
         public ConcurrentDictionary<uint, ClientInfo> activeClients = new ConcurrentDictionary<uint, ClientInfo>();
         public ConcurrentDictionary<IPEndPoint, uint> UDPAliases = new ConcurrentDictionary<IPEndPoint, uint>();
         private uint max_connections = 100;
@@ -64,16 +60,24 @@ namespace NetLib_NETStandart {
         private bool _connectionRunning = false;
         private int port;
 
-        public event EventHandler<ConnectionEventArgs> onNewConnection;
-        public event EventHandler<ConnectionEventArgs> onClientDisconnected;
-        public event EventHandler<ConnectionEventArgs> onHeartbeat;
+        public event EventHandler<ConnectionEventArgs>? onNewConnection;
+        public event EventHandler<ConnectionEventArgs>? onClientDisconnected;
+        public event EventHandler<ConnectionEventArgs>? onHeartbeat;
+        public event EventHandler<ConnectionEventArgs>? onConnect;
 
         public Connection(int port = 0) {
             this.port = port;
 
-            tcpListener = new TcpListener(IPAddress.Any, port);
-            //if (port != 0) port+=2;
-            udpListener = new UdpClient(port);
+            Console.WriteLine($"[Connection] Setting up ports {port}...");
+
+            if (port == 0) {
+                tcpListener = new TcpListener(IPAddress.Any, port);
+                udpListener = new UdpClient(port);
+            }
+            else {
+                tcpListener = new TcpListener(IPAddress.Any, port);
+                udpListener = new UdpClient(port);
+            }
 
             t_ct = t_cts.Token;
             t_networkTcpListener = new Task(_networkTcpReceive, t_ct);
@@ -106,12 +110,14 @@ namespace NetLib_NETStandart {
 
         }
         
-        public async void Close() { //TODO: send a disconnect packet
+        public async void Close() {
+            SendUDP(1, new DisconnectPacket("bye bye"));
+
             _connectionRunning = false;
 
-            t_cts.Cancel();
             await t_networkTcpListener;
             await t_networkUdpListener;
+            await t_heartbeatSender;
             t_networkTcpListener.Dispose();
             t_networkUdpListener.Dispose();
             t_heartbeatSender.Dispose();
@@ -139,7 +145,15 @@ namespace NetLib_NETStandart {
         }
 
         public void ConnectToServer(IPEndPoint receiver) {
-            TcpClient client = new TcpClient(receiver.Address.ToString(), receiver.Port);
+            TcpClient client;
+            try {
+                client = new TcpClient(receiver.Address.ToString(), receiver.Port);
+            }
+            catch (Exception ex) {
+                Console.WriteLine(ex.ToString());
+                Close();
+                return;
+            }
             //IPEndPoint serverUDP = new IPEndPoint(receiver.Address, receiver.Port + 2);
             activeClients.TryAdd(1, new ClientInfo() { clientTCP = client, clientUDPEndPoint = receiver, isAlive = true});
             UDPAliases.TryAdd(receiver, 1);
@@ -153,6 +167,7 @@ namespace NetLib_NETStandart {
 
             if (!activeClients.TryGetValue(receiver, out ClientInfo? client)) return; //get client
             if (client == null) return;
+            Console.WriteLine($"[TCP] Receiver info: {client.clientTCP.Client.RemoteEndPoint}");
 
             NetworkStream stream = client.clientTCP.GetStream();
             stream.Write(data, 0, data.Length);
@@ -168,7 +183,7 @@ namespace NetLib_NETStandart {
                 exists = true;
             }
             if (!exists) {
-                Console.WriteLine("Tried to send to ");
+                Console.WriteLine("Tried to send to non registered client");
                 return;
             }
             udpListener.Send(data, data.Length, client.clientUDPEndPoint);
@@ -187,11 +202,10 @@ namespace NetLib_NETStandart {
             uint newId = GetAvailableClientId();
             activeClients.TryAdd(newId, new ClientInfo() { clientTCP = client, clientUDPEndPoint = endPoint});
             UDPAliases.TryAdd(endPoint, newId);
-            //activeClients.TryAdd(endPoint, new ClientInfo() { clientTCP = client, clientUDPEndPoint = endPoint} );
         }
 
-        public void disconnectClient(uint clientId) {            
-            SendUDP(clientId, new DisconnectPacket("You have been disconnected!"));
+        public void disconnectClient(uint clientId, bool confirm = false) {            
+            if(confirm) SendUDP(clientId, new DisconnectPacket("You have been disconnected!"));
             activeClients.TryGetValue(clientId, out ClientInfo client);
             client.isAlive = false;
 
@@ -213,16 +227,23 @@ namespace NetLib_NETStandart {
         private bool handle_internal_packets(uint sender, Packet packet) {
             switch (packet.header.packetType) {
                 case PacketType.ConnectPacket:
-                    Console.WriteLine("[Connection] Got connectpacket, bruh");
-                    if (!activeClients.TryGetValue(sender, out ClientInfo? client)) return true; // what
-                    if(client == null) return true;                                              // also what
+                    Console.WriteLine($"[Connection] Got connectpacket from {sender}");
+                    if (!activeClients.TryGetValue(sender, out ClientInfo? client)) {
+                        Console.WriteLine("user was not present in activeClients");
+                        return true; // what
+                    }
+                    if (client == null) {
+                        Console.WriteLine("client was null (???)");
+                        return true;
+                    }// also what
 
                     ConnectPacket cp = (ConnectPacket)packet;
                     IPEndPoint newClientEndPoint = new IPEndPoint((client.clientTCP.Client.RemoteEndPoint as IPEndPoint).Address, cp.UdpPort);
                     client.clientUDPEndPoint = newClientEndPoint;
-                    UDPAliases.TryAdd(newClientEndPoint, sender);
+                    Console.WriteLine($"[Connection] Adding client to UDPAliases result: {UDPAliases.TryAdd(newClientEndPoint, sender)}");
 
                     ConnectAckPacket cap = new ConnectAckPacket(sender);
+                    Console.WriteLine($"[Connection] Sending conACK packet to {sender}!");
                     SendTCP(sender, cap);
 
                     onNewConnection?.Invoke(this, new ConnectionEventArgs { client_id = sender });
@@ -233,6 +254,7 @@ namespace NetLib_NETStandart {
                     ConnectAckPacket cap_recv = (ConnectAckPacket)packet;
                     this.connection_key = cap_recv.Key;
                     Console.WriteLine($"[Connection] НОВЫЙ ГОД получили в подарок ключ!!: {cap_recv.Key}");
+                    onConnect?.Invoke(this, new ConnectionEventArgs() { client_id = cap_recv.Key });
                     return true;
 
                 case PacketType.HeartbeatPacket:
@@ -247,7 +269,7 @@ namespace NetLib_NETStandart {
                     activeClients.TryGetValue(hap_recv.header.sender, out client);
                     client.RTT = newrtt;
                     client.lastSeq++;
-                    Console.WriteLine($"[Connection] {sender} heartbeat: {newrtt}ms");
+                    //Console.WriteLine($"[Connection] {sender} heartbeat: {newrtt}ms");
                     return true;
 
                 case PacketType.DisconnectPacket:
@@ -258,13 +280,14 @@ namespace NetLib_NETStandart {
             }
         }
 
-        //-----------------------------------------separate threads
+        //-----------------------------------------separate tasks
         private async void _networkTcpReceive() {
             if (!_connectionRunning) return;
 
             while (_connectionRunning && !t_ct.IsCancellationRequested) {
 
                 if (tcpListener.Pending()) { //check for incoming connections
+                    Console.WriteLine($"this shouldnt happen on client");
                     TcpClient client = tcpListener.AcceptTcpClient(); //blocking 
                     Console.WriteLine($"New client connected: {client.Client.RemoteEndPoint}"); //TODO: some sort of client checking so that we dont accept random connections
 
@@ -276,7 +299,7 @@ namespace NetLib_NETStandart {
 
                     //might want to do smth here like send a greeting message or whatever
                     //or probably should read the connectPacket uuhhhh idk
-                    SendTCP(newId, new TestPacket("oh, hi!!"));
+                    //SendTCP(newId, new TestPacket("oh, hi!!"));
                 }
 
                 Parallel.ForEach(activeClients, (KeyValuePair<uint, ClientInfo> client) => {  //read all incoming messages (this is probably wrong i have no idea)
@@ -295,9 +318,9 @@ namespace NetLib_NETStandart {
                     }
                 });
 
+                if (t_ct.IsCancellationRequested) t_ct.ThrowIfCancellationRequested();
             }
 
-            t_ct.ThrowIfCancellationRequested();
         }
 
 
@@ -308,36 +331,38 @@ namespace NetLib_NETStandart {
         
             while (_connectionRunning && !t_ct.IsCancellationRequested) {
                 if(udpListener.Available > 0) { //UDP Listen
-                    byte[] data = udpListener.Receive(ref connection);
-                    if (!UDPAliases.TryGetValue(connection, out uint _)) continue;
+                    try {
+                        byte[] data = udpListener.Receive(ref connection);
+                        if (!UDPAliases.TryGetValue(connection, out uint _)) continue;
 
-                    //Console.WriteLine(connection);
-                    Packet? packet = PacketReader.ReadFromRaw(data);
-                    uint sender = packet.header.sender;
-                    if (activeClients.TryGetValue(sender, out _)) {
-                        //Console.WriteLine($"[UDP] Received message from {sender}, reading...");
-                        if (packet != null)
-                            if (!handle_internal_packets(sender, packet))
-                                q_incomingMessages.Enqueue(new NetMessage { packet = packet, RecieveTime = DateTime.Now });
-                    }
-                    else {
-                        Console.WriteLine($"[UDP] Received message from a disconnected user...");
+
+                        //Console.WriteLine(connection);
+                        Packet? packet = PacketReader.ReadFromRaw(data);
+                        uint sender = packet.header.sender;
+                        if (activeClients.TryGetValue(sender, out _)) {
+                            //Console.WriteLine($"[UDP] Received message from {sender}, reading...");
+                            if (packet != null)
+                                if (!handle_internal_packets(sender, packet))
+                                    q_incomingMessages.Enqueue(new NetMessage { packet = packet, RecieveTime = DateTime.Now });
+                        }
+                        else {
+                            Console.WriteLine($"[UDP] Received message from a non-registered user...");
+                        }
+                    } catch (SocketException e) {
+                        Console.WriteLine($"Caught a socket expression while receiving from {connection}! disconnecting the client...");
                     }
                 }
                 else {
                    await Task.Delay(1); //nothing to do => sleepy time 
                 }
-            }
-        
-            t_ct.ThrowIfCancellationRequested();
+                if(t_ct.IsCancellationRequested) t_ct.ThrowIfCancellationRequested();
+            }    
         }
 
         private async void _heartbeatSender() {
             if (!_connectionRunning) return;
 
             while (_connectionRunning && !t_ct.IsCancellationRequested) {
-
-
                 Parallel.ForEach(activeClients, (KeyValuePair<uint, ClientInfo> client) => {
                     if (!client.Value.isAlive) return;
                     if (client.Value.seq - client.Value.lastSeq > 5) {  //packet loss of five or more --> disconnect due to bad network connection
@@ -348,11 +373,19 @@ namespace NetLib_NETStandart {
                         client.Value.seq++;
                     }
                 });
-                onHeartbeat?.Invoke(this, new ConnectionEventArgs());
-                await Task.Delay(1000);
+
+                await Task.Delay(250);
+
+                Dictionary<uint, float> heartbeats = new Dictionary<uint, float>();
+                foreach (KeyValuePair<uint, ClientInfo> client in activeClients) {
+                    heartbeats.Add(client.Key, client.Value.RTT);
+                }
+                onHeartbeat?.Invoke(this, new ConnectionEventArgs() {
+                    heartbeatInfo = heartbeats
+                });
+                if (t_ct.IsCancellationRequested) t_ct.ThrowIfCancellationRequested();
             }
 
-            t_ct.ThrowIfCancellationRequested();
         }
     }
 }

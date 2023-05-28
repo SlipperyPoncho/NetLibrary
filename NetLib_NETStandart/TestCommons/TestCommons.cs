@@ -2,13 +2,11 @@
 
 namespace TestCommons {
 
-    [Serializable]
     public enum customPacketType {
         PlayerInput,
         PlayerPosition,
     }
 
-    [Serializable]
     public struct PlayerInput {
         public bool W;
         public bool A;
@@ -16,7 +14,6 @@ namespace TestCommons {
         public bool D;
     }
 
-    [Serializable]
     public struct PlayerPosition {
         public uint client_id;
         public float X;
@@ -37,7 +34,7 @@ namespace TestCommons {
             index = PacketReader.ReadBool(ref payload, index, out bool W);
             index = PacketReader.ReadBool(ref payload, index, out bool A);
             index = PacketReader.ReadBool(ref payload, index, out bool S);
-                     PacketReader.ReadBool(ref payload, index, out bool D);
+                    PacketReader.ReadBool(ref payload, index, out bool D);
 
             return new PlayerInput() { W = W, A = A, S = S, D = D };
         }

@@ -13,6 +13,7 @@ namespace NetLib_NETStandart {
     namespace Server {
         public class ServerEventArgs : EventArgs {
             public uint client_id { get; set; }
+            public Dictionary<uint, float>? heartbeatInfo { get; set; }
         }
 
         public class Server
@@ -34,6 +35,7 @@ namespace NetLib_NETStandart {
                 connection.SetConnectionKey(1);
                 connection.onNewConnection += NewClientConnected;
                 connection.onHeartbeat += OnHeartbeat;
+                connection.onClientDisconnected += ClientDisconnected;
                 t_serverRunTask = new Task(_serverRunLoop);
             }
 
@@ -63,15 +65,16 @@ namespace NetLib_NETStandart {
 
             }
 
-            public void OnHeartbeat(object sender, ConnectionEventArgs args) {
-                onHeartbeat?.Invoke(this, new ServerEventArgs());
+            private void OnHeartbeat(object sender, ConnectionEventArgs args) {
+                if (args.heartbeatInfo == null) return;
+                onHeartbeat?.Invoke(this, new ServerEventArgs() { heartbeatInfo = args.heartbeatInfo});
             }
 
-            public void NewClientConnected(object sender, ConnectionEventArgs args) {
+            private void NewClientConnected(object sender, ConnectionEventArgs args) {
                 onNewConnection?.Invoke(this, new ServerEventArgs { client_id = args.client_id });
             }
 
-            public void ClientDisconnected(object sender, ConnectionEventArgs args) {
+            private void ClientDisconnected(object sender, ConnectionEventArgs args) {
                 onClientDisconnect?.Invoke(this, new ServerEventArgs { client_id = args.client_id });
             }
 

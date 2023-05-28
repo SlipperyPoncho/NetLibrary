@@ -14,7 +14,8 @@ namespace NetLib_NETStandart {
         private Thread _clientRunThread;
         public Connection connection;
         private IPEndPoint serverEndPoint;
-
+        public bool connected = false;
+        public uint client_id = 0;
         public ConcurrentQueue<NetMessage> q_incomingMessages = new ConcurrentQueue<NetMessage>();
 
         public Client(IPEndPoint serverEndPoint) 
@@ -23,6 +24,14 @@ namespace NetLib_NETStandart {
             connection = new Connection(0);
 
             _clientRunThread = new Thread(new ThreadStart(_clientRunLoop));
+
+            connection.onConnect += Connection_onConnect;
+        }
+
+        private void Connection_onConnect(object sender, ConnectionEventArgs e) {
+            connected = true;
+            client_id = e.client_id;
+            Console.WriteLine($"[Client] Successfully connected to server {serverEndPoint}!");
         }
 
         public void Start()
@@ -30,8 +39,8 @@ namespace NetLib_NETStandart {
             _clientRunning = true;
             connection.Start();
             _clientRunThread.Start();
-            Console.WriteLine($"[Client] Successfully started!");
             connection.ConnectToServer(serverEndPoint);
+            Console.WriteLine($"[Client] Successfully started!");
         }
 
         public void Tick()

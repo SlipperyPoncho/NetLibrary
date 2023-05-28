@@ -3,9 +3,17 @@ using NetLib_NETStandart;
 using TestCommons;
 
 class TestServer {
+    static void printHeartbeats(object? sender, ServerEventArgs args) {
+        if (args.heartbeatInfo == null) return;
+        foreach(KeyValuePair<uint, float> hb in args.heartbeatInfo) {
+            Console.WriteLine($"Client {hb.Key} connection status: {hb.Value}ms");
+        }
+    }
     static void Main(string[] args) {
         Server server = new(12000);
         server.Start();
+
+        server.onHeartbeat += printHeartbeats; 
 
         string? input = "";
         while (server.Running) {
