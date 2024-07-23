@@ -1,33 +1,30 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace NetLib_NETStandart.Packets {
-    public class HeartbeatPacket : Packet {
-        private DateTime timeStamp;
-        public DateTime TimeStamp { get => timeStamp; set => timeStamp = value; }
+    public struct HeartbeatStatus {
+        public float rtt;
+        public bool packetloss;
+    }
 
-        public HeartbeatPacket(DateTime stamp) {
+    public class HeartbeatPacket : Packet {
+        private long timeStamp;
+        public long TimeStamp { get => timeStamp; set => timeStamp = value; }
+
+        public HeartbeatPacket(long stamp) {
+            header.packetType = PacketType.HeartbeatPacket;
             timeStamp = stamp;
-            PacketType = PacketType.HeartbeatPacket;
         }
 
         public override byte[] GetRaw() {
+            MemoryStream payloadstream = new MemoryStream();
+            PacketBuilder.WriteLong(ref payloadstream, TimeStamp);
+            header.payloadLength = (int)payloadstream.Length;
+
             MemoryStream stream = new MemoryStream();
-
-            byte[] data = BitConverter.GetBytes(PacketID);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes((int)PacketType);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes(Sender);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes(sizeof(long));
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes(timeStamp.Ticks);
-            stream.Write(data, 0, data.Length);
+            PacketBuilder.WriteHeader(ref stream, header);
+            payloadstream.WriteTo(stream);
 
             return stream.ToArray();
         }

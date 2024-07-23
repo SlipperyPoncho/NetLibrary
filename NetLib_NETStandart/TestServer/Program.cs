@@ -3,9 +3,17 @@ using NetLib_NETStandart;
 using TestCommons;
 
 class TestServer {
+    static void printHeartbeats(object? sender, ServerEventArgs args) {
+        if (args.heartbeatInfo == null) return;
+        foreach(KeyValuePair<uint, float> hb in args.heartbeatInfo) {
+            Console.WriteLine($"Client {hb.Key} connection status: {hb.Value}ms");
+        }
+    }
     static void Main(string[] args) {
         Server server = new(12000);
         server.Start();
+
+        server.onHeartbeat += printHeartbeats; 
 
         string? input = "";
         while (server.Running) {
@@ -21,12 +29,12 @@ class TestServer {
                     case (int)customPacketType.PlayerInput:
                         PlayerInput inputs = PlayerInputPacket.read(payload);
                         Console.WriteLine(inputs.W + " " + inputs.A + " " + inputs.S + " " + inputs.D + " ");
-                        server.connection.SendTCP(packet.Sender, new PlayerInputPacket(inputs));
+                        server.connection.SendUDP(packet.header.sender, new PlayerInputPacket(inputs));
                         break;
                     case (int)customPacketType.PlayerPosition:
                         PlayerPosition pos = PlayerPositionPacket.read(payload);
                         Console.WriteLine(pos.client_id + " " + pos.X + " " + pos.Y + " " + pos.rotation);
-                        server.connection.SendTCP(packet.Sender, new PlayerPositionPacket(pos));
+                        server.connection.SendUDP(packet.header.sender, new PlayerPositionPacket(pos));
                         break;
                     default:
                         Console.WriteLine("POOP POOP");

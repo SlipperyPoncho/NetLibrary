@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -11,28 +12,20 @@ namespace NetLib_NETStandart.Packets {
 
         public DisconnectPacket(string msg) 
         {
+            header.packetType = PacketType.DisconnectPacket;
             this.msg = msg;
-            PacketType = PacketType.DisconnectPacket;
         }
 
         public override byte[] GetRaw() 
         {
+            MemoryStream payloadstream = new MemoryStream();
+            PacketBuilder.WriteString(ref payloadstream, msg);
+            header.payloadLength = (int)payloadstream.Length;
+
             MemoryStream stream = new MemoryStream();
+            PacketBuilder.WriteHeader(ref stream, header);
+            payloadstream.WriteTo(stream);
 
-            byte[] data = BitConverter.GetBytes(PacketID);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes((int)PacketType);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes(Sender);
-            stream.Write(data, 0, data.Length);
-
-            data = BitConverter.GetBytes(msg.Length * sizeof(char));
-            stream.Write(data, 0, data.Length);
-
-            data = Encoding.Unicode.GetBytes(msg);
-            stream.Write(data, 0, data.Length);
 
             return stream.ToArray();
         }

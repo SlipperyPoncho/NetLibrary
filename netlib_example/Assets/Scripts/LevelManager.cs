@@ -5,7 +5,10 @@ using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour
 {
+
+    
     private void Awake() {
-        SceneManager.LoadScene(3, LoadSceneMode.Additive);
+        SceneManager.LoadScene(5, LoadSceneMode.Additive);
+        SceneManager.LoadScene(4, LoadSceneMode.Additive);
     }
 }
